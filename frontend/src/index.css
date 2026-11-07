@@ -2,17 +2,18 @@
 
 /* Landing page palette and heading font */
 @theme {
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
 
-  --color-cream: #f6f1e7;
-  --color-sand: #eadfcb;
-  --color-sage: #dce5d3;
-  --color-sage-deep: #3f5e4a;
-  --color-ink: #1f2a24;
-  --color-ink-soft: #4a564f;
-  --color-clay: #b4472f;
-  --color-clay-dark: #93391f;
-  --color-coral: #e8956f;
+  --color-night: #0f1535;
+  --color-dusk: #262e5c;
+  --color-plum: #5a3f6e;
+  --color-haze: #b8bedf;
+  --color-sun: #ffd27a;
+  --color-peach: #ffb38a;
+  --color-lilac: #b9b4f5;
+  --color-mist: #eef0fb;
+  --color-navy: #1a1f3d;
+  --color-muted: #4b5175;
 }
 
 @media (prefers-reduced-motion: no-preference) {

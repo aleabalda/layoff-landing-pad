@@ -7,6 +7,7 @@ const PILLARS = [
       "Ways to manage stress and rebuild a routine",
       "Guided reflection to make sense of what happened",
     ],
+    badge: "bg-lilac",
   },
   {
     name: "Rebuild",
@@ -16,6 +17,7 @@ const PILLARS = [
       "Help finding and closing your skill gaps",
       "An honest answer to “Why did you leave?”",
     ],
+    badge: "bg-peach",
   },
   {
     name: "Crew",
@@ -25,55 +27,51 @@ const PILLARS = [
       "An accountability buddy to check in with",
       "Mentors who've landed new jobs and come back to help",
     ],
+    badge: "bg-sun",
   },
 ];
 
 function Pillars() {
   return (
-    <section className="bg-ink py-24 text-cream">
-      <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
-        <div className="lg:sticky lg:top-12 lg:self-start">
-          <h2 className="font-display text-4xl leading-tight font-medium tracking-tight text-balance sm:text-5xl">
+    <section className="py-24">
+      <div className="mx-auto grid max-w-6xl gap-4 px-4 sm:px-6 md:grid-cols-2">
+        <div className="flex flex-col justify-end rounded-[2rem] bg-night p-8 text-white sm:p-10">
+          <h2 className="font-display text-4xl leading-[1.05] font-bold tracking-tight text-balance sm:text-5xl">
             Losing a job takes more than your paycheque
           </h2>
-          <p className="mt-6 text-lg text-pretty text-cream/80">
+          <p className="mt-5 text-pretty text-haze">
             It knocks out your income, your routine, your sense of who you are,
             and your work friendships all at once. Most job-search tools only
             deal with finding the next job. We help with the rest of it too.
           </p>
         </div>
 
-        <ol className="divide-y divide-cream/15 border-y border-cream/15">
-          {PILLARS.map(({ name, summary, points }, index) => (
-            <li
-              key={name}
-              className="grid gap-4 py-10 sm:grid-cols-[5rem_1fr] sm:gap-6"
+        {PILLARS.map(({ name, summary, points, badge }) => (
+          <article
+            key={name}
+            className="rounded-[2rem] bg-white p-8 shadow-sm ring-1 ring-navy/5 sm:p-10"
+          >
+            <span
+              className={`inline-flex rounded-full px-3 py-1 font-display text-sm font-bold text-navy ${badge}`}
             >
-              <span
-                aria-hidden="true"
-                className="font-display text-5xl leading-none text-coral italic"
-              >
-                0{index + 1}
-              </span>
-              <div>
-                <h3 className="font-display text-3xl font-medium tracking-tight">
-                  {name}
-                </h3>
-                <p className="mt-1 text-lg text-cream/90">{summary}</p>
-                <ul className="mt-5 space-y-2.5 text-cream/75">
-                  {points.map((point) => (
-                    <li key={point} className="flex gap-3">
-                      <span aria-hidden="true" className="text-coral">
-                        →
-                      </span>
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          ))}
-        </ol>
+              {name}
+            </span>
+            <h3 className="mt-5 font-display text-2xl font-bold tracking-tight">
+              {summary}
+            </h3>
+            <ul className="mt-5 space-y-3 text-muted">
+              {points.map((point) => (
+                <li key={point} className="flex gap-3">
+                  <span
+                    aria-hidden="true"
+                    className={`mt-2 size-2 shrink-0 rounded-full ${badge}`}
+                  />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
       </div>
     </section>
   );

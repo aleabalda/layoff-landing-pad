@@ -2,20 +2,20 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router";
 import { FOCUS_RING } from "./styles";
 
-// onDark is for buttons sitting on the terracotta call-to-action block.
-function CallsToAction({ onDark = false }: { onDark?: boolean }) {
+// tone is the background the buttons sit on.
+function CallsToAction({ tone = "light" }: { tone?: "light" | "dark" }) {
   const { isAuthenticated } = useAuth0();
 
-  const base = `inline-flex justify-center rounded-full px-6 py-3 text-sm font-medium transition-colors ${FOCUS_RING}`;
+  const base = `inline-flex justify-center rounded-full border px-6 py-3 text-sm font-semibold transition-colors ${FOCUS_RING}`;
   const primary = `${base} ${
-    onDark
-      ? "bg-cream text-ink hover:bg-white"
-      : "bg-ink text-cream hover:bg-ink/85"
+    tone === "dark"
+      ? "border-sun bg-sun text-night hover:border-[#ffe09e] hover:bg-[#ffe09e]"
+      : "border-night bg-night text-white hover:border-dusk hover:bg-dusk"
   }`;
-  const secondary = `${base} border ${
-    onDark
-      ? "border-cream/60 text-cream hover:bg-cream/10"
-      : "border-ink/25 text-ink hover:bg-ink/5"
+  const secondary = `${base} ${
+    tone === "dark"
+      ? "border-white/30 text-white hover:bg-white/10"
+      : "border-navy/25 text-navy hover:bg-navy/5"
   }`;
 
   if (isAuthenticated) {
