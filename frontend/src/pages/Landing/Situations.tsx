@@ -20,26 +20,29 @@ const SITUATIONS = [
 
 function Situations() {
   return (
-    <div className="mt-20 rounded-2xl border border-slate-200 bg-white p-6 sm:p-10">
-      <h2 className="text-2xl font-semibold tracking-tight text-balance">
-        Built around how your job ended
-      </h2>
-      <p className="mt-2 text-pretty text-slate-600">
-        Each situation feels different, so your plan starts from yours.
-      </p>
-      <div className="mt-8 grid gap-6 md:grid-cols-3">
+    <div className="mt-24 grid gap-10 rounded-[2rem] bg-sand p-6 sm:p-12 lg:grid-cols-[1fr_1.2fr] lg:gap-16">
+      <div className="lg:self-center">
+        <h2 className="font-display text-3xl leading-tight font-medium tracking-tight text-balance sm:text-4xl">
+          Built around how your job ended
+        </h2>
+        <p className="mt-4 text-pretty text-ink-soft">
+          Each situation feels different, so your plan starts from yours.
+        </p>
+        <div className="mt-8">
+          <CallsToAction />
+        </div>
+      </div>
+
+      <ul className="space-y-3">
         {SITUATIONS.map(({ title, description }) => (
-          <div key={title}>
-            <h3 className="font-semibold">{title}</h3>
-            <p className="mt-1 text-sm text-pretty text-slate-600">
+          <li key={title} className="rounded-2xl bg-cream p-5 sm:p-6">
+            <h3 className="font-display text-xl font-medium">{title}</h3>
+            <p className="mt-1 text-sm text-pretty text-ink-soft">
               {description}
             </p>
-          </div>
+          </li>
         ))}
-      </div>
-      <div className="mt-8">
-        <CallsToAction />
-      </div>
+      </ul>
     </div>
   );
 }

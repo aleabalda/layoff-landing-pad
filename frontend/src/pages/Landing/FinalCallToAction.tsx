@@ -2,15 +2,16 @@ import CallsToAction from "./CallsToAction";
 
 function FinalCallToAction() {
   return (
-    <section className="bg-slate-900 py-20 text-white">
-      <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-        <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-          The first 30 days decide a lot. Nobody should go through them alone.
+    <section className="px-4 pb-24 sm:px-6">
+      <div className="mx-auto max-w-6xl rounded-[2.5rem] bg-clay px-6 py-16 text-center text-cream sm:px-12 sm:py-24">
+        <h2 className="mx-auto max-w-3xl font-display text-4xl leading-tight font-medium tracking-tight text-balance sm:text-5xl">
+          The first 30 days decide a lot.{" "}
+          <em>Nobody should go through them alone.</em>
         </h2>
-        <p className="mt-4 text-slate-300">
+        <p className="mt-5 text-lg">
           Start with one check-in. We'll take it from there.
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <CallsToAction onDark />
         </div>
       </div>

@@ -30,37 +30,50 @@ const PILLARS = [
 
 function Pillars() {
   return (
-    <section className="border-y border-slate-200 bg-white py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="max-w-2xl">
-          <h2 className="text-3xl font-semibold tracking-tight text-balance">
+    <section className="bg-ink py-24 text-cream">
+      <div className="mx-auto grid max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
+        <div className="lg:sticky lg:top-12 lg:self-start">
+          <h2 className="font-display text-4xl leading-tight font-medium tracking-tight text-balance sm:text-5xl">
             Losing a job takes more than your paycheque
           </h2>
-          <p className="mt-4 text-pretty text-slate-600">
+          <p className="mt-6 text-lg text-pretty text-cream/80">
             It knocks out your income, your routine, your sense of who you are,
             and your work friendships all at once. Most job-search tools only
             deal with finding the next job. We help with the rest of it too.
           </p>
         </div>
 
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {PILLARS.map(({ name, summary, points }) => (
-            <article
+        <ol className="divide-y divide-cream/15 border-y border-cream/15">
+          {PILLARS.map(({ name, summary, points }, index) => (
+            <li
               key={name}
-              className="rounded-2xl border border-slate-200 bg-slate-50 p-6"
+              className="grid gap-4 py-10 sm:grid-cols-[5rem_1fr] sm:gap-6"
             >
-              <h3 className="text-xl font-semibold tracking-tight text-teal-800">
-                {name}
-              </h3>
-              <p className="mt-1 font-medium">{summary}</p>
-              <ul className="mt-4 space-y-2.5 text-sm text-slate-600">
-                {points.map((point) => (
-                  <li key={point}>{point}</li>
-                ))}
-              </ul>
-            </article>
+              <span
+                aria-hidden="true"
+                className="font-display text-5xl leading-none text-coral italic"
+              >
+                0{index + 1}
+              </span>
+              <div>
+                <h3 className="font-display text-3xl font-medium tracking-tight">
+                  {name}
+                </h3>
+                <p className="mt-1 text-lg text-cream/90">{summary}</p>
+                <ul className="mt-5 space-y-2.5 text-cream/75">
+                  {points.map((point) => (
+                    <li key={point} className="flex gap-3">
+                      <span aria-hidden="true" className="text-coral">
+                        →
+                      </span>
+                      {point}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );

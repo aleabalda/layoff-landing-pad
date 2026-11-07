@@ -29,30 +29,49 @@ const WEEKS = [
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="scroll-mt-4 py-20">
+    <section id="how-it-works" className="scroll-mt-4 py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="max-w-2xl">
-          <h2 className="text-3xl font-semibold tracking-tight text-balance">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="font-display text-4xl leading-tight font-medium tracking-tight text-balance sm:text-5xl">
             Your 30-day reset, one week at a time
           </h2>
-          <p className="mt-4 text-pretty text-slate-600">
+          <p className="mt-4 text-lg text-pretty text-ink-soft">
             Each week unlocks gradually, so you won't feel buried on day one.
           </p>
         </div>
 
-        <ol className="mt-12 grid gap-8 md:grid-cols-4 md:gap-6">
-          {WEEKS.map(({ week, theme, description }) => (
-            <li key={week} className="border-t-2 border-teal-700 pt-4">
-              <p className="text-sm text-slate-500">{week}</p>
-              <h3 className="mt-1 text-xl font-semibold tracking-tight">
-                {theme}
-              </h3>
-              <p className="mt-2 text-sm text-pretty text-slate-600">
-                {description}
-              </p>
-            </li>
-          ))}
-        </ol>
+        <div className="relative mt-16">
+          <div
+            aria-hidden="true"
+            className="absolute top-6 right-[12.5%] left-[12.5%] hidden h-px bg-ink/20 md:block"
+          />
+          <ol className="relative grid gap-10 md:grid-cols-4 md:gap-6">
+            {WEEKS.map(({ week, theme, description }, index) => (
+              <li
+                key={week}
+                className="flex gap-5 md:flex-col md:items-center md:text-center"
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex size-12 shrink-0 items-center justify-center rounded-full bg-clay font-display text-xl text-cream ring-8 ring-cream"
+                >
+                  {index + 1}
+                </span>
+                <div className="md:mt-5">
+                  <p className="text-xs font-medium tracking-widest text-ink-soft uppercase">
+                    {week}
+                  </p>
+                  <h3 className="mt-1 font-display text-2xl font-medium tracking-tight">
+                    {theme}
+                  </h3>
+                  <p className="mt-2 text-sm text-pretty text-ink-soft">
+                    {description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
 
         <Situations />
       </div>

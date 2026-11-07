@@ -6,28 +6,32 @@ function Header() {
   const { isAuthenticated } = useAuth0();
 
   return (
-    <header className="mx-auto flex max-w-6xl items-start justify-between gap-4 px-4 py-5 sm:px-6">
+    <header className="mx-auto flex max-w-6xl items-start justify-between gap-4 px-4 pt-6 sm:px-6">
       <div>
         <Link
           to="/"
-          className={`rounded text-sm font-semibold tracking-tight text-slate-700 ${FOCUS_RING}`}
+          className={`inline-flex items-start gap-2 rounded font-display text-lg leading-tight font-semibold tracking-tight sm:text-xl ${FOCUS_RING}`}
         >
+          <span
+            aria-hidden="true"
+            className="mt-2 size-2.5 shrink-0 rounded-full bg-clay"
+          />
           Layoff Landing Pad
         </Link>
 
         <nav
           aria-label="Page sections"
-          className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm"
+          className="mt-1.5 flex flex-wrap gap-x-5 gap-y-1 pl-4.5"
         >
           <a
             href="#how-it-works"
-            className="text-slate-600 hover:text-slate-900 text-xs"
+            className="text-xs text-ink-soft underline-offset-4 hover:text-clay hover:underline"
           >
             How it works
           </a>
           <a
             href="#safety"
-            className="text-slate-600 hover:text-slate-900 text-xs"
+            className="text-xs text-ink-soft underline-offset-4 hover:text-clay hover:underline"
           >
             Our safety approach
           </a>
@@ -36,12 +40,12 @@ function Header() {
 
       <nav
         aria-label="Account"
-        className="flex shrink-0 items-center gap-5 text-sm"
+        className="flex shrink-0 items-center gap-4 text-sm"
       >
         {isAuthenticated ? (
           <Link
             to="/home"
-            className={`rounded-lg bg-slate-900 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-700 ${FOCUS_RING}`}
+            className={`rounded-full bg-ink px-5 py-2.5 font-medium text-cream transition-colors hover:bg-ink/85 ${FOCUS_RING}`}
           >
             Go to your home
           </Link>
@@ -49,13 +53,13 @@ function Header() {
           <>
             <Link
               to="/login"
-              className="font-medium text-slate-700 hover:text-slate-900"
+              className="font-medium text-ink underline-offset-4 hover:underline"
             >
               Log in
             </Link>
             <Link
               to="/register"
-              className={`rounded-lg bg-slate-900 px-4 py-2 font-medium text-white transition-colors hover:bg-slate-700 ${FOCUS_RING}`}
+              className={`rounded-full bg-ink px-5 py-2.5 font-medium text-cream transition-colors hover:bg-ink/85 ${FOCUS_RING}`}
             >
               Get started
             </Link>

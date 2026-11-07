@@ -11,17 +11,19 @@ function Landing() {
   const { error } = useAuth0();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
+    <div className="min-h-screen bg-cream text-ink">
       <Header />
 
       <main>
         {error && (
-          <p
-            role="alert"
-            className="mx-auto mt-2 max-w-6xl rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 sm:px-6"
-          >
-            We couldn't log you in: {error.message}
-          </p>
+          <div className="mx-auto mt-6 max-w-6xl px-4 sm:px-6">
+            <p
+              role="alert"
+              className="rounded-2xl border border-clay/30 bg-white px-5 py-3 text-sm text-clay-dark"
+            >
+              We couldn't log you in: {error.message}
+            </p>
+          </div>
         )}
 
         <Hero />
