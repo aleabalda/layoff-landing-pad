@@ -1,6 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
+import { supabase } from "../../supabaseClient";
 
 const MOODS = [
   { value: 1, emoji: "😣", label: "Overwhelmed" },
@@ -34,9 +35,27 @@ function Home() {
   const [mood, setMood] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [doneTasks, setDoneTasks] = useState<string[]>([]);
+  const [savedName, setSavedName] = useState<string | null>(null);
 
-  const name = user?.given_name ?? user?.nickname;
+  const auth0Name = user?.given_name ?? user?.nickname;
+  const name = savedName ?? auth0Name;
   const tasks = mood && mood >= 4 ? HIGH_ENERGY_TASKS : LOW_ENERGY_TASKS;
+
+  // Creates the person's database row on their first visit.
+  useEffect(() => {
+    let isCurrent = true;
+
+    supabase
+      .rpc("ensure_user", { new_display_name: auth0Name ?? null })
+      .then(({ data, error }) => {
+        if (error) console.error("Couldn't load your account:", error.message);
+        else if (isCurrent) setSavedName(data);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [auth0Name]);
 
   const toggleTask = (task: string) =>
     setDoneTasks((done) =>
