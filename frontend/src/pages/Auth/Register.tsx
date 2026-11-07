@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Link } from "react-router";
-import AuthCard from "./AuthCard";
+import AuthCard from "../../components/AuthCard";
 
 function Register() {
   const { loginWithRedirect, error } = useAuth0();
