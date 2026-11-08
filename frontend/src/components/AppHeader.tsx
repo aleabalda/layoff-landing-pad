@@ -3,17 +3,19 @@ import { Link, NavLink } from "react-router";
 
 const TABS = [
   { to: "/home", label: "Today" },
+  { to: "/crews", label: "Crews" },
+  { to: "/messages", label: "Messages" },
   { to: "/profile", label: "Profile" },
 ];
 
-// `wide` matches pages that use the wider max-w-4xl layout.
-function AppHeader({ wide = false }: { wide?: boolean }) {
+// Full width on every page, so the logo and tabs stay put when switching
+// tabs. w-full matters on pages laid out as a flex column (Messages), where
+// the header would otherwise shrink to its contents.
+function AppHeader() {
   const { logout } = useAuth0();
 
   return (
-    <header
-      className={`mx-auto flex ${wide ? "max-w-4xl" : "max-w-2xl"} items-center justify-between gap-4 px-4 py-6`}
-    >
+    <header className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-6 sm:px-6">
       <Link
         to="/"
         className="text-sm font-semibold tracking-tight text-slate-500 hover:text-slate-900"

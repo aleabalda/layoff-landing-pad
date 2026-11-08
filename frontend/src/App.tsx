@@ -1,11 +1,14 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import type { ReactNode } from "react";
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, useParams } from "react-router";
 import { useProfile } from "./ProfileProvider";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import CrewDetail from "./pages/Crews/CrewDetail";
+import Crews from "./pages/Crews/Crews";
 import Home from "./pages/Home/Home";
 import Landing from "./pages/Landing/Landing";
+import Messages from "./pages/Messages/Messages";
 import Onboarding from "./pages/Onboarding/Onboarding";
 import Profile from "./pages/Profile/Profile";
 
@@ -15,6 +18,12 @@ function CenteredMessage({ children }: { children: ReactNode }) {
       {children}
     </main>
   );
+}
+
+// Groups were renamed to crews. Keeps old /groups links working.
+function OldGroupLink() {
+  const { crewId } = useParams();
+  return <Navigate to={crewId ? `/crews/${crewId}` : "/crews"} replace />;
 }
 
 function App() {
@@ -73,6 +82,15 @@ function App() {
       />
       <Route path="/home" element={requireOnboarded(<Home />)} />
       <Route path="/profile" element={requireOnboarded(<Profile />)} />
+      <Route path="/crews" element={requireOnboarded(<Crews />)} />
+      <Route path="/groups" element={<OldGroupLink />} />
+      <Route path="/groups/:crewId" element={<OldGroupLink />} />
+      <Route path="/messages" element={requireOnboarded(<Messages />)} />
+      <Route
+        path="/messages/:kind/:conversationId"
+        element={requireOnboarded(<Messages />)}
+      />
+      <Route path="/crews/:crewId" element={requireOnboarded(<CrewDetail />)} />
       <Route
         path="/login"
         element={
@@ -82,7 +100,11 @@ function App() {
       <Route
         path="/register"
         element={
-          isAuthenticated ? <Navigate to={signedInHome} replace /> : <Register />
+          isAuthenticated ? (
+            <Navigate to={signedInHome} replace />
+          ) : (
+            <Register />
+          )
         }
       />
       <Route path="*" element={<Navigate to="/" replace />} />

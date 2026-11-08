@@ -50,7 +50,8 @@ function Onboarding() {
   const set = <K extends keyof Answers>(key: K, value: Answers[K]) =>
     setAnswers((current) => ({ ...current, [key]: value }));
 
-  const toggleTag = (tag: string) => set("tags", toggleInList(answers.tags, tag));
+  const toggleTag = (tag: string) =>
+    set("tags", toggleInList(answers.tags, tag));
 
   const stepIsComplete = [
     answers.displayName.trim() !== "",
@@ -122,7 +123,9 @@ function Onboarding() {
               />
               <span
                 className={`mt-2 block text-xs ${
-                  index === step ? "font-medium text-slate-900" : "text-slate-500"
+                  index === step
+                    ? "font-medium text-slate-900"
+                    : "text-slate-500"
                 }`}
                 aria-current={index === step ? "step" : undefined}
               >
