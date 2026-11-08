@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 // Read once when the app loads.
 const YEAR = new Date().getFullYear();
 
@@ -13,7 +15,13 @@ function SiteFooter({ spacing = "pt-6 pb-2" }: { spacing?: string }) {
         Landing Pad is here to support you, but it isn't therapy.
       </p>
       <p className="mt-4 text-xs text-slate-400">
-        © {YEAR} CozyFleece. All rights reserved.
+        © {YEAR} CozyFleece. All rights reserved. ·{" "}
+        <Link
+          to="/about"
+          className="underline-offset-4 hover:text-slate-700 hover:underline"
+        >
+          About us
+        </Link>
       </p>
     </footer>
   );
