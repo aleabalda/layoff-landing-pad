@@ -116,7 +116,7 @@ function Crews() {
             type="button"
             onClick={() => setIsCreating(true)}
             disabled={isCreating}
-            className="w-full cursor-pointer rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-default disabled:bg-slate-300"
+            className="w-full cursor-pointer rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-default disabled:bg-slate-300"
           >
             {isCreating ? "Creating a crew..." : "Create a crew"}
           </button>
@@ -323,7 +323,7 @@ function JoinWithCode() {
         <button
           type="submit"
           disabled={isJoining || !code.trim()}
-          className="cursor-pointer rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="cursor-pointer rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           {isJoining ? "Joining..." : "Join"}
         </button>

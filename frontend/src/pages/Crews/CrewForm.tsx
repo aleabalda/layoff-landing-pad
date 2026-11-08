@@ -212,7 +212,7 @@ function CrewForm({
         <button
           type="submit"
           disabled={isSaving}
-          className="cursor-pointer rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="cursor-pointer rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           {isSaving ? "Saving..." : submitLabel}
         </button>

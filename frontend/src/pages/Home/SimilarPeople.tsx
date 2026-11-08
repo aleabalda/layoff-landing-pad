@@ -11,7 +11,7 @@ type Suggestion = PublicPerson & { shared_tags: string[]; score: number };
 // sent a request, so adding them back made you friends.
 type RequestState = "sending" | "pending" | "accepted";
 
-function SimilarPeople() {
+function SimilarPeople({ className = "" }: { className?: string }) {
   const [people, setPeople] = useState<Suggestion[] | null>(null);
   const [requests, setRequests] = useState<Record<string, RequestState>>({});
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +68,7 @@ function SimilarPeople() {
   return (
     <section
       aria-labelledby="similar-heading"
-      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+      className={`rounded-2xl border border-slate-200 bg-white p-6 shadow-sm ${className}`}
     >
       <h2
         id="similar-heading"
@@ -124,7 +124,7 @@ function SimilarPeople() {
                         disabled={state === "sending"}
                         onClick={() => addFriend(person.user_id)}
                         aria-label={`Add ${person.display_name ?? "this person"} as a friend`}
-                        className="cursor-pointer rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700 disabled:bg-slate-300"
+                        className="cursor-pointer rounded-lg bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800 disabled:bg-slate-300"
                       >
                         {state === "sending" ? "Sending..." : "Add friend"}
                       </button>

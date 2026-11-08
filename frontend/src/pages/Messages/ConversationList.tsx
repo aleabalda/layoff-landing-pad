@@ -93,7 +93,7 @@ function ConversationList({
         <button
           type="button"
           onClick={isPicking ? () => setIsPicking(false) : startPicking}
-          className="cursor-pointer rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
+          className="cursor-pointer rounded-lg bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800"
         >
           {isPicking ? "Cancel" : "New message"}
         </button>

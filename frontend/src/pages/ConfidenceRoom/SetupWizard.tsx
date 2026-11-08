@@ -18,7 +18,7 @@ const STEPS = ["The role", "The posting", "The interview", "Your resume"];
 const LAST_STEP = STEPS.length - 1;
 
 const PRIMARY_BUTTON =
-  "cursor-pointer rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300";
+  "cursor-pointer rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300";
 const TEXT_BUTTON =
   "cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300";
 const INPUT =

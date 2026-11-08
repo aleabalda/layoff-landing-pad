@@ -8,7 +8,7 @@ function CallsToAction({ onDark = false }: { onDark?: boolean }) {
   const primary = `inline-flex justify-center rounded-lg px-5 py-3 text-sm font-medium transition-colors ${FOCUS_RING} ${
     onDark
       ? "bg-white text-slate-900 hover:bg-teal-50"
-      : "bg-slate-900 text-white hover:bg-slate-700"
+      : "bg-teal-700 text-white hover:bg-teal-800"
   }`;
   const secondary = `inline-flex justify-center rounded-lg border px-5 py-3 text-sm font-medium transition-colors ${FOCUS_RING} ${
     onDark

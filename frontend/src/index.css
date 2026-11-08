@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/*
+  The app's look: Plus Jakarta Sans, slate for text and surfaces, teal for
+  anything you can act on or that's selected.
+*/
+@theme {
+  --font-sans:
+    "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+  }
+
+  ::selection {
+    @apply bg-teal-100 text-teal-950;
+  }
+
+  /* One focus style everywhere: a teal outline for keyboard users. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-teal-600;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;

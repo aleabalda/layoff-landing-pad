@@ -200,7 +200,7 @@ function AddJobForm({ onAdded }: { onAdded: (job: JobPosting) => void }) {
           disabled={
             isSaving || !jobTitle.trim() || !company.trim() || !!urlProblem
           }
-          className="w-full cursor-pointer rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          className="w-full cursor-pointer rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
           {isSaving
             ? "Saving..."

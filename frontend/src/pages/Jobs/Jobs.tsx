@@ -14,7 +14,6 @@ import { JOB_COLUMNS, type JobPosting } from "./jobTypes";
 function Jobs() {
   const [jobs, setJobs] = useState<JobPosting[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<"find" | "postings">("find");
 
   useEffect(() => {
     let isCurrent = true;
@@ -72,43 +71,9 @@ function Jobs() {
         </aside>
 
         <div className="min-w-0 lg:pt-4">
-          <div
-            role="tablist"
-            aria-label="Job search"
-            className="mb-5 inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
-          >
-            {(
-              [
-                { value: "find", label: "Find jobs" },
-                {
-                  value: "postings",
-                  label: `Your postings${jobs ? ` (${jobs.length})` : ""}`,
-                },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.value}
-                type="button"
-                role="tab"
-                aria-selected={view === tab.value}
-                onClick={() => setView(tab.value)}
-                className={`cursor-pointer rounded-lg px-4 py-1.5 text-sm font-medium transition-colors ${
-                  view === tab.value
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <ErrorNote message={error} />
-          {/* Both stay mounted, so switching tabs keeps your search results. */}
-          <div hidden={view !== "find"}>
+          <div className="space-y-6">
             <FindJobs />
-          </div>
-          <div hidden={view !== "postings"}>
+            <ErrorNote message={error} />
             {jobs === null && !error ? (
               <p className="text-sm text-slate-500">Loading...</p>
             ) : (

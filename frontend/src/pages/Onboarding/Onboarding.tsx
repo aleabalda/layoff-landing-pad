@@ -28,6 +28,7 @@ import {
 } from "../../resume";
 import { supabase } from "../../supabaseClient";
 import TagPicker, { toggleInList } from "../../components/TagPicker";
+import Brand from "../../components/Brand";
 
 const STEPS = [
   "About you",
@@ -233,9 +234,7 @@ function Onboarding() {
     <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto w-full max-w-lg">
         <div className="mb-6 flex items-center justify-between text-sm">
-          <span className="font-semibold tracking-tight text-slate-500">
-            Layoff Landing Pad
-          </span>
+          <Brand to={null} />
           <button
             type="button"
             onClick={() =>
@@ -423,7 +422,7 @@ function Onboarding() {
               <button
                 type="submit"
                 disabled={!stepIsComplete || !!busy}
-                className="cursor-pointer rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="cursor-pointer rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {submitLabel}
               </button>

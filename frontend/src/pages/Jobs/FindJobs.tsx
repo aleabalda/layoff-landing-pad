@@ -90,19 +90,23 @@ function FindJobs() {
   };
 
   return (
-    <section aria-labelledby="find-jobs-heading" className="min-w-0">
-      <h2
-        id="find-jobs-heading"
-        className="text-lg font-semibold tracking-tight text-slate-900"
-      >
-        Search the job sites
-      </h2>
-      <p className="mt-1 text-sm text-slate-600">
-        Type your search once and open it on each site. Their listings open in a
-        new tab.
-      </p>
+    <section
+      aria-labelledby="find-jobs-heading"
+      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2
+          id="find-jobs-heading"
+          className="font-semibold tracking-tight text-slate-900"
+        >
+          Search job sites
+        </h2>
+        <p className="text-xs text-slate-500">
+          Opens each site's own listings in a new tab.
+        </p>
+      </div>
 
-      <div className="mt-4 grid items-end gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+      <div className="mt-3 grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
         <div>
           <label
             htmlFor="find-what"
@@ -148,36 +152,31 @@ function FindJobs() {
         </label>
       </div>
 
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-xs font-medium text-slate-500">
+          Search on
+        </span>
         {SITES.map((site) => (
-          <li
+          <a
             key={site.name}
-            className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+            href={site.url(search)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={site.description}
+            className="inline-flex items-center gap-1 rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-sm font-medium text-teal-900 transition-colors hover:border-teal-300 hover:bg-teal-100"
           >
-            <p className="font-medium text-slate-900">{site.name}</p>
-            <p className="mt-0.5 text-sm text-slate-600">{site.description}</p>
-            <a
-              href={site.url(search)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 self-start rounded-lg bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800"
-            >
-              Search {site.name} ↗
-            </a>
-          </li>
+            {site.name}
+            <span aria-hidden="true" className="text-teal-700">
+              ↗
+            </span>
+          </a>
         ))}
-      </ul>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-300 bg-white p-4">
-        <p className="text-sm text-slate-600">
-          Found one you like? Copy its link and add it here to keep track.
-        </p>
         <button
           type="button"
           onClick={focusAddForm}
-          className="cursor-pointer rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          className="ml-auto cursor-pointer text-sm font-medium text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline"
         >
-          Add a posting
+          Found one? Add it →
         </button>
       </div>
     </section>

@@ -592,7 +592,7 @@ function ChatPane({
               <button
                 type="submit"
                 disabled={(!draft.trim() && !file) || isSending || !header}
-                className="h-10 cursor-pointer rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="h-10 cursor-pointer rounded-xl bg-teal-700 px-4 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {isSending ? "Sending..." : "Send"}
               </button>

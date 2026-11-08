@@ -49,7 +49,7 @@ function App() {
         <button
           type="button"
           onClick={profile.reload}
-          className="cursor-pointer rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700"
+          className="cursor-pointer rounded-lg bg-teal-700 px-4 py-2 font-medium text-white hover:bg-teal-800"
         >
           Try again
         </button>
