@@ -1,0 +1,198 @@
+/*
+  The app's look for LiveKit's video components: light slate surfaces, white
+  cards, teal accents and rounded corners, like the rest of Landing Pad.
+
+  LiveKit reads these variables wherever data-lk-theme is set. Workroom.tsx
+  sets data-lk-theme="landing-pad". Loaded after @livekit/components-styles.
+*/
+
+[data-lk-theme="landing-pad"] {
+  color-scheme: light;
+
+  /* Surfaces: page, cards, hover, pressed */
+  --lk-bg: #f8fafc; /* slate-50 */
+  --lk-bg2: #ffffff;
+  --lk-bg3: #f1f5f9; /* slate-100 */
+  --lk-bg4: #e2e8f0; /* slate-200 */
+  --lk-bg5: #cbd5e1; /* slate-300 */
+
+  /* Text */
+  --lk-fg: #0f172a; /* slate-900 */
+  --lk-fg2: #1e293b;
+  --lk-fg3: #334155;
+  --lk-fg4: #475569;
+  --lk-fg5: #64748b;
+
+  --lk-border-color: #e2e8f0;
+
+  /* Teal, like the app's primary actions */
+  --lk-accent-fg: #ffffff;
+  --lk-accent-bg: #0f766e; /* teal-700 */
+  --lk-accent2: #0d9488;
+  --lk-accent3: #14b8a6;
+  --lk-accent4: #2dd4bf;
+
+  --lk-danger-fg: #ffffff;
+  --lk-danger: #dc2626; /* red-600 */
+  --lk-danger2: #ef4444;
+  --lk-danger3: #b91c1c;
+  --lk-danger4: #f87171;
+
+  --lk-success-fg: #ffffff;
+  --lk-success: #0d9488;
+  --lk-success2: #14b8a6;
+  --lk-success3: #2dd4bf;
+  --lk-success4: #5eead4;
+
+  /* Buttons in the control bar: white, slate hover, teal when on */
+  --lk-control-fg: #0f172a;
+  --lk-control-bg: #ffffff;
+  --lk-control-hover-bg: #f1f5f9;
+  --lk-control-active-bg: #ccfbf1; /* teal-100 */
+  --lk-control-active-hover-bg: #99f6e4; /* teal-200 */
+
+  --lk-font-family: inherit;
+  --lk-border-radius: 0.75rem; /* rounded-xl, like the app's cards */
+  --lk-box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+  --lk-drop-shadow: rgb(15 23 42 / 0.08) 0 4px 16px;
+  --lk-grid-gap: 0.75rem;
+}
+
+/* The room sits inside a white card, so let the card show through. */
+[data-lk-theme="landing-pad"] .lk-video-conference,
+[data-lk-theme="landing-pad"] .lk-prejoin {
+  background-color: transparent;
+}
+
+/* Control bar buttons get a border, like the app's secondary buttons. */
+[data-lk-theme="landing-pad"] .lk-control-bar .lk-button {
+  border: 1px solid var(--lk-border-color);
+  font-weight: 500;
+}
+[data-lk-theme="landing-pad"]
+  .lk-control-bar
+  .lk-button[data-lk-enabled="true"] {
+  border-color: #5eead4; /* teal-300 */
+  color: #134e4a; /* teal-900 */
+}
+
+/* The speaking outline already uses --lk-accent-bg (teal). */
+
+/* Tiles: a soft slate card while the camera is off. */
+[data-lk-theme="landing-pad"] .lk-participant-tile {
+  background-color: #f1f5f9;
+  border: 1px solid var(--lk-border-color);
+}
+[data-lk-theme="landing-pad"] .lk-participant-placeholder {
+  background-color: #f1f5f9;
+}
+[data-lk-theme="landing-pad"] .lk-participant-placeholder svg {
+  color: #cbd5e1;
+}
+
+/* Names and mic icons sit on top of video, so keep them dark and readable. */
+[data-lk-theme="landing-pad"] .lk-participant-metadata-item {
+  background-color: rgb(15 23 42 / 0.7);
+  color: #ffffff;
+}
+
+/* Camera preview before joining: slate instead of black. */
+[data-lk-theme="landing-pad"] .lk-prejoin .lk-video-container,
+[data-lk-theme="landing-pad"]
+  .lk-prejoin
+  .lk-video-container
+  .lk-camera-off-note {
+  background-color: #e2e8f0;
+}
+[data-lk-theme="landing-pad"] .lk-prejoin .lk-camera-off-note svg {
+  color: #94a3b8;
+}
+
+/* The join button looks like the app's main buttons. */
+[data-lk-theme="landing-pad"] .lk-prejoin .lk-join-button {
+  background-color: #0f172a;
+  color: #ffffff;
+  font-weight: 500;
+}
+[data-lk-theme="landing-pad"] .lk-prejoin .lk-join-button:hover {
+  background-color: #334155;
+}
+
+/* Chat panel: a white side card with a border, not a dark overlay. */
+[data-lk-theme="landing-pad"] .lk-chat {
+  background-color: #ffffff;
+  border-left: 1px solid var(--lk-border-color);
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry .lk-message-body {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+[data-lk-theme="landing-pad"]
+  .lk-chat-entry[data-lk-message-origin="local"]
+  .lk-message-body {
+  background-color: #0f766e;
+  color: #ffffff;
+}
+
+/* Keyboard focus: the app's teal outline. */
+[data-lk-theme="landing-pad"] :focus-visible {
+  outline: 2px solid #0d9488;
+  outline-offset: 2px;
+}
+
+/*
+  Layout. LiveKit sizes the video area as "100% minus exactly 69px" and
+  expects the control bar to fit in those 69px. Inside the app's cards the bar
+  can be taller, which pushed it out of view. Instead: the bar takes the height
+  it needs, always stays at the bottom, and video fills whatever is left.
+*/
+[data-lk-theme="landing-pad"] .lk-room-container,
+[data-lk-theme="landing-pad"] .lk-video-conference {
+  height: 100%;
+  min-height: 0;
+}
+[data-lk-theme="landing-pad"] .lk-video-conference-inner {
+  height: 100%;
+  min-height: 0;
+}
+[data-lk-theme="landing-pad"] .lk-grid-layout-wrapper,
+[data-lk-theme="landing-pad"] .lk-focus-layout-wrapper {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 0;
+}
+[data-lk-theme="landing-pad"] .lk-control-bar {
+  flex-shrink: 0;
+  max-height: none;
+  flex-wrap: wrap;
+  background-color: #ffffff;
+}
+
+/*
+  Show each camera and shared screen at its real shape, letterboxed, instead of
+  stretching or cropping it to fill the tile.
+*/
+[data-lk-theme="landing-pad"] .lk-participant-media-video,
+[data-lk-theme="landing-pad"]
+  .lk-participant-media-video[data-lk-orientation="landscape"] {
+  object-fit: contain;
+  background-color: #0f172a; /* slate-900, behind the video only */
+}
+
+/*
+  No padding around the cameras: video goes right to the edges of the call
+  card, with just a thin gap between people.
+*/
+[data-lk-theme="landing-pad"] .lk-grid-layout,
+[data-lk-theme="landing-pad"] .lk-focus-layout {
+  padding: 0;
+  gap: 2px;
+}
+[data-lk-theme="landing-pad"] .lk-carousel {
+  padding: 0;
+  gap: 2px;
+}
+[data-lk-theme="landing-pad"] .lk-participant-tile {
+  border: 0;
+  border-radius: 0;
+}
