@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import AppHeader from "../../components/AppHeader";
 import { Card, ErrorNote } from "../../components/Card";
-import CalendarPlaceholder from "./CalendarPlaceholder";
+import Calendar from "./Calendar/Calendar";
 import CrewPulse from "./CrewPulse";
 import FriendRequests from "./FriendRequests";
 import SimilarPeople from "./SimilarPeople";
@@ -13,12 +13,14 @@ import { planDayNumber, weekAndDay } from "../../plan/plan";
 import { PLAN_LENGTH_DAYS, PLAN_WEEKS } from "../../plan/planTemplate";
 import { usePlanTasks } from "../../plan/usePlanTasks";
 
+// Values must match the check on checkins.mood (1-6) in the database.
 const MOODS = [
   { value: 1, emoji: "😣", label: "Overwhelmed" },
   { value: 2, emoji: "😔", label: "Low" },
   { value: 3, emoji: "😐", label: "Okay" },
   { value: 4, emoji: "🙂", label: "Good" },
   { value: 5, emoji: "😊", label: "Hopeful" },
+  { value: 6, emoji: "🤩", label: "Excited" },
 ];
 
 const LINK_CLASSES =
@@ -64,7 +66,7 @@ function Home() {
                 How are you feeling today?
               </h2>
 
-              <div className="mt-4 grid grid-cols-2 gap-2 @[20rem]:grid-cols-3 @[34rem]:grid-cols-5">
+              <div className="mt-4 grid grid-cols-2 gap-2 @[20rem]:grid-cols-3 @[40rem]:grid-cols-6">
                 {MOODS.map(({ value, emoji, label }) => (
                   <button
                     key={value}
@@ -126,7 +128,7 @@ function Home() {
             ) : (
               <BuildPlanCard />
             )}
-            <CalendarPlaceholder />
+            <Calendar />
           </div>
 
           <aside
