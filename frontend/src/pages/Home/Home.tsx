@@ -26,9 +26,6 @@ const MOODS = [
 const LINK_CLASSES =
   "shrink-0 text-sm font-medium text-teal-800 underline-offset-4 hover:underline";
 
-const LINK_CLASSES =
-  "shrink-0 text-sm font-medium text-teal-800 underline-offset-4 hover:underline";
-
 function Home() {
   const { profile } = useProfile();
   const [mood, setMood] = useState<number | null>(null);
@@ -69,7 +66,7 @@ function Home() {
                 How are you feeling today?
               </h2>
 
-              <div className="mt-4 grid grid-cols-2 gap-2 @[20rem]:grid-cols-3 @[40rem]:grid-cols-6">
+              <div className="mt-4 grid grid-cols-2 gap-2 @xs:grid-cols-3 @[40rem]:grid-cols-6">
                 {MOODS.map(({ value, emoji, label }) => (
                   <button
                     key={value}
