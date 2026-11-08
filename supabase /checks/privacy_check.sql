@@ -14,6 +14,11 @@ declare
   code text;
   one_task jsonb := '[{"key": "check-task", "week": 1, "day": 1, "position": 0, "category": "steady", "energy": "low", "title": "Check task"}]';
 begin
+  -- field must be one of the allowed values, so the test users could land in a
+  -- real crew. join_crew() picks the newest crew with room, so this one, dated
+  -- tomorrow, is where both test users go. It's undone with the rest.
+  insert into public.crews (field, start_date) values ('other', current_date + 1);
+
   -- Act as user A
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
   set local role authenticated;
@@ -76,6 +81,30 @@ begin
   assert n = 1, 'B should see their crew''s messages';
   select g.invite_code into code from public.get_crew(crew_x) as g;
   assert code is null, 'Only the owner should see the invite code';
+
+  -- Plans: A builds one and ticks a task. B can't see or tick A's tasks.
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
+  assert public.create_plan(current_date, one_task) = current_date, 'A should be able to build a plan';
+  assert public.create_plan(current_date + 1, one_task) = current_date, 'create_plan should keep an existing plan';
+  select count(*) into n from public.tasks;
+  assert n = 1, 'Building a plan twice should not duplicate tasks';
+
+  select id into task_a from public.tasks where template_key = 'check-task';
+  perform public.set_task_done(task_a, true, current_date);
+  select count(*) into n from public.wins where task_id = task_a;
+  assert n = 1, 'Ticking a task should record a win';
+  perform public.set_task_done(task_a, false, current_date);
+  select count(*) into n from public.wins where task_id = task_a;
+  assert n = 0, 'Unticking a task should remove its win';
+
+  perform set_config('request.jwt.claims', json_build_object('sub', b, 'role', 'authenticated')::text, true);
+  select count(*) into n from public.tasks;
+  assert n = 0, 'B should NOT see A''s plan';
+  begin
+    perform public.set_task_done(task_a, true, current_date);
+    assert false, 'B should NOT be able to tick A''s task';
+  exception when raise_exception then null;
+  end;
 
   -- Plans: A builds one and ticks a task. B can't see or tick A's tasks.
   perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);

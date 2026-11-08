@@ -26,6 +26,9 @@ const MOODS = [
 const LINK_CLASSES =
   "shrink-0 text-sm font-medium text-teal-800 underline-offset-4 hover:underline";
 
+const LINK_CLASSES =
+  "shrink-0 text-sm font-medium text-teal-800 underline-offset-4 hover:underline";
+
 function Home() {
   const { profile } = useProfile();
   const [mood, setMood] = useState<number | null>(null);
