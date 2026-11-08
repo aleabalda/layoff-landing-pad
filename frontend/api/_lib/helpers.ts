@@ -11,6 +11,16 @@ export class HttpError extends Error {
   }
 }
 
+// Turns a Supabase error into one that's safe to show. A bad or expired token
+// becomes "Please log in again." rather than a raw JWT message.
+export function fromDatabaseError(error: { code?: string; message: string }) {
+  const isAuthProblem =
+    error.code === "PGRST301" || error.code === "PGRST302" || /jwt/i.test(error.message);
+  if (isAuthProblem) return new HttpError(401, "Please log in again.");
+  console.error("Database error", error);
+  return new HttpError(500, "Something went wrong. Please try again.");
+}
+
 export function reply(status: number, body: unknown) {
   return Response.json(body, { status });
 }
