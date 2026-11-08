@@ -141,7 +141,7 @@ function FindJobs() {
             className={inputClasses}
           />
         </div>
-        <label className="flex h-[38px] cursor-pointer items-center gap-2 text-sm text-slate-700">
+        <label className="flex h-9.5 cursor-pointer items-center gap-2 text-sm text-slate-700">
           <input
             type="checkbox"
             checked={remote}

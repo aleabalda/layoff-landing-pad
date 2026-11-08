@@ -10,7 +10,11 @@ export const ANSWER_MAX_LENGTH = 6000;
 export type InterviewStyle = "mixed" | "behavioural" | "technical";
 export type QuestionType = "behavioural" | "technical";
 
-export const STYLE_OPTIONS: { value: InterviewStyle; label: string; hint: string }[] = [
+export const STYLE_OPTIONS: {
+  value: InterviewStyle;
+  label: string;
+  hint: string;
+}[] = [
   {
     value: "mixed",
     label: "A mix",
@@ -217,7 +221,9 @@ export function feedbackToSpeech(feedback: Feedback) {
     feedback.improvements.length
       ? `To make it stronger: ${feedback.improvements.join(" ")}`
       : "",
-    feedback.follow_up ? `They might follow up with: ${feedback.follow_up}` : "",
+    feedback.follow_up
+      ? `They might follow up with: ${feedback.follow_up}`
+      : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -228,7 +234,9 @@ export function summaryToSpeech(summary: InterviewSummary, rating: number) {
     `Overall, ${rating} out of 5: ${RATING_LABELS[rating]}.`,
     summary.headline,
     summary.overall,
-    summary.next_steps.length ? `Before the real thing: ${summary.next_steps.join(" ")}` : "",
+    summary.next_steps.length
+      ? `Before the real thing: ${summary.next_steps.join(" ")}`
+      : "",
   ]
     .filter(Boolean)
     .join(" ");

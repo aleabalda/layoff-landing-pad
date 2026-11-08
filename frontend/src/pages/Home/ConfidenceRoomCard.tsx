@@ -28,7 +28,7 @@ function ConfidenceRoomCard({ className = "" }: { className?: string }) {
   return (
     <section
       aria-labelledby="confidence-card-heading"
-      className={`relative flex flex-col overflow-hidden rounded-2xl border border-teal-200 bg-gradient-to-br from-teal-50 via-white to-amber-50 p-6 shadow-sm ${className}`}
+      className={`relative flex flex-col overflow-hidden rounded-2xl border border-teal-200 bg-linear-to-br from-teal-50 via-white to-amber-50 p-6 shadow-sm ${className}`}
     >
       <div className="flex items-center gap-2">
         <span

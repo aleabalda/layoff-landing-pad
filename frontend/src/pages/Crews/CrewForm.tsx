@@ -168,7 +168,7 @@ function CrewForm({
           {VISIBILITY_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className={`cursor-pointer rounded-xl border px-3 py-2.5 text-sm transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-teal-600 ${
+              className={`cursor-pointer rounded-xl border px-3 py-2.5 text-sm transition-colors has-focus-visible:outline-2 has-focus-visible:outline-teal-600 ${
                 values.visibility === option.value
                   ? "border-teal-600 bg-teal-50"
                   : "border-slate-200 hover:bg-slate-50"

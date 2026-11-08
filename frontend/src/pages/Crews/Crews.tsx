@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import AppHeader from "../../components/AppHeader";
 import { ErrorNote } from "../../components/Card";
@@ -6,7 +6,9 @@ import { useProfile } from "../../ProfileProvider";
 import { ALL_TAGS, FIELDS, labelFor } from "../../profileOptions";
 import { supabase } from "../../supabaseClient";
 import CrewCard from "./CrewCard";
+import CrewFilters from "./CrewFilters";
 import CrewForm from "./CrewForm";
+import JoinWithCode from "./JoinWithCode";
 import type { CrewSummary, CrewValues } from "./crewTypes";
 
 function Crews() {
@@ -121,75 +123,14 @@ function Crews() {
             {isCreating ? "Creating a crew..." : "Create a crew"}
           </button>
           <JoinWithCode />
-          <section
-            aria-labelledby="crew-filters-heading"
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-          >
-            <h2
-              id="crew-filters-heading"
-              className="font-semibold tracking-tight text-slate-900"
-            >
-              Find a crew
-            </h2>
-            <div className="mt-4">
-              <label
-                htmlFor="crew-search"
-                className="text-sm font-medium text-slate-700"
-              >
-                Search
-              </label>
-              <input
-                id="crew-search"
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Crew name, description, or interest"
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
-              />
-            </div>
-            <div className="mt-4">
-              <label
-                htmlFor="crew-field-filter"
-                className="text-sm font-medium text-slate-700"
-              >
-                Filter by work field
-              </label>
-              <select
-                id="crew-field-filter"
-                value={fieldFilter ?? ""}
-                onChange={(event) => setFieldFilter(event.target.value || null)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
-              >
-                <option value="">All fields</option>
-                {FIELDS.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mt-4">
-              <label
-                htmlFor="crew-tag-filter"
-                className="text-sm font-medium text-slate-700"
-              >
-                Filter by interest
-              </label>
-              <select
-                id="crew-tag-filter"
-                value={tagFilter ?? ""}
-                onChange={(event) => setTagFilter(event.target.value || null)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
-              >
-                <option value="">All interests</option>
-                {ALL_TAGS.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </section>
+          <CrewFilters
+            search={search}
+            onSearchChange={setSearch}
+            fieldFilter={fieldFilter}
+            onFieldFilterChange={setFieldFilter}
+            tagFilter={tagFilter}
+            onTagFilterChange={setTagFilter}
+          />
         </aside>
 
         <div className="min-w-0 space-y-8 lg:pt-4">
@@ -275,61 +216,6 @@ function Crews() {
         </div>
       </main>
     </div>
-  );
-}
-
-function JoinWithCode() {
-  const navigate = useNavigate();
-  const [code, setCode] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!code.trim()) return;
-
-    setIsJoining(true);
-    setError(null);
-    const { data, error } = await supabase.rpc("join_crew_by_code", {
-      code: code.trim(),
-    });
-    setIsJoining(false);
-
-    if (error) setError(error.message);
-    else navigate(`/crews/${data}`);
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-2xl border border-dashed border-slate-300 bg-white p-5"
-    >
-      <label
-        htmlFor="invite-code"
-        className="text-sm font-medium text-slate-900"
-      >
-        Got an invite code for a private crew?
-      </label>
-      <div className="mt-2 flex gap-2">
-        <input
-          id="invite-code"
-          type="text"
-          value={code}
-          onChange={(event) => setCode(event.target.value)}
-          placeholder="e.g. 4F9A1C27B3"
-          autoComplete="off"
-          className="w-full min-w-0 rounded-lg border border-slate-200 px-3 py-2 font-mono text-sm tracking-wider text-slate-900 uppercase placeholder:tracking-normal placeholder:normal-case focus:border-teal-600 focus:outline-none"
-        />
-        <button
-          type="submit"
-          disabled={isJoining || !code.trim()}
-          className="cursor-pointer rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-        >
-          {isJoining ? "Joining..." : "Join"}
-        </button>
-      </div>
-      <ErrorNote message={error} />
-    </form>
   );
 }
 
