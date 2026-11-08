@@ -9,6 +9,11 @@ export function setSupabaseTokenGetter(getter: TokenGetter) {
   getToken = getter;
 }
 
+// The signed-in person's Auth0 ID token, for calling our own API routes.
+export function getAuthToken() {
+  return getToken();
+}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
