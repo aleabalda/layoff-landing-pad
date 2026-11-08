@@ -186,7 +186,7 @@ function Calendar({ className = "" }: { className?: string }) {
                   tabIndex={isSelected ? 0 : -1}
                   onClick={() => select(date)}
                   onKeyDown={handleKeyDown}
-                  className={`flex min-h-16 cursor-pointer flex-col @[28rem]:min-h-20 items-stretch rounded-lg border p-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-600 ${
+                  className={`flex min-h-16 cursor-pointer flex-col @md:min-h-20 items-stretch rounded-lg border p-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-600 ${
                     isSelected
                       ? "border-teal-600 bg-teal-50"
                       : inMonth
@@ -208,7 +208,7 @@ function Calendar({ className = "" }: { className?: string }) {
                       {dayNumber}
                     </span>
                     {apps.length > 0 && (
-                      <span className="hidden text-[10px] leading-6 text-slate-500 tabular-nums @[28rem]:inline">
+                      <span className="hidden text-[10px] leading-6 text-slate-500 tabular-nums @md:inline">
                         📨{apps.length}
                       </span>
                     )}
@@ -217,7 +217,7 @@ function Calendar({ className = "" }: { className?: string }) {
                   {/* Middle: that day's mood, centered. */}
                   <span
                     aria-hidden="true"
-                    className="flex flex-1 items-center justify-center text-xl leading-none @[28rem]:text-2xl"
+                    className="flex flex-1 items-center justify-center text-xl leading-none @md:text-2xl"
                   >
                     {mood?.emoji}
                   </span>
@@ -228,7 +228,7 @@ function Calendar({ className = "" }: { className?: string }) {
                       {events.slice(0, MAX_LINES).map((e) => (
                         <span
                           key={e.id}
-                          className={`block h-1 w-full rounded-full @[28rem]:h-1.5 ${kindInfo(e.kind).dot}`}
+                          className={`block h-1 w-full rounded-full @md:h-1.5 ${kindInfo(e.kind).dot}`}
                         />
                       ))}
                       {followUps.length > 0 && (
@@ -267,7 +267,7 @@ function Calendar({ className = "" }: { className?: string }) {
               Follow-up due
             </li>
             <li>🙂 your check-in</li>
-            <li className="hidden @[28rem]:list-item">📨 applications sent</li>
+            <li className="hidden @md:list-item">📨 applications sent</li>
           </ul>
         </div>
 
