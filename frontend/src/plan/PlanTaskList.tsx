@@ -45,6 +45,11 @@ function PlanTaskList({
                 >
                   {ENERGY_LABELS[task.energy_level] ?? task.energy_level}
                 </span>
+                {task.personalized_at && (
+                  <span className="rounded-full bg-violet-50 px-2 py-0.5 text-violet-800">
+                    ✨ Tailored to you
+                  </span>
+                )}
                 {task.link_url && (
                   <a
                     href={task.link_url}

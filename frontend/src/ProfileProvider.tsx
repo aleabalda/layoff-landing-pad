@@ -23,11 +23,17 @@ export type Profile = {
   share_pulse: boolean;
   onboarded_at: string | null;
   plan_start_date: string | null;
+  linkedin_url: string | null;
+  github_url: string | null;
+  website_url: string | null;
+  resume_path: string | null;
+  resume_name: string | null;
+  resume_uploaded_at: string | null;
   created_at: string;
 };
 
 const PROFILE_COLUMNS =
-  "display_name, city, bio, job_end_reason, initial_feeling, urgent_need, field, experience_level, tags, discoverable, share_pulse, onboarded_at, plan_start_date, created_at";
+  "display_name, city, bio, job_end_reason, initial_feeling, urgent_need, field, experience_level, tags, discoverable, share_pulse, onboarded_at, plan_start_date, linkedin_url, github_url, website_url, resume_path, resume_name, resume_uploaded_at, created_at";
 
 type ProfileState = {
   profile: Profile | null;
