@@ -1,6 +1,6 @@
 import AppHeader from "../../components/AppHeader";
 import FriendsList from "./FriendsList";
-import JobTracker from "./JobTracker";
+import { Link } from "react-router";
 import ProfileDetails from "./ProfileDetails";
 import WinsProgress from "./WinsProgress";
 
@@ -16,7 +16,13 @@ function Profile() {
           Your progress
         </h2>
         <WinsProgress />
-        <JobTracker />
+        <p className="px-1 text-sm text-slate-600">
+          Your job applications now live in{" "}
+          <Link to="/jobs" className="font-medium text-teal-800 underline">
+            Job search
+          </Link>
+          .
+        </p>
       </main>
     </div>
   );

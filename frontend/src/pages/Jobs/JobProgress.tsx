@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 import { daysAgo, formatDate } from "../../dates";
-import { JOB_STATUSES } from "../../profileOptions";
+import { JOB_STATUSES } from "./jobTypes";
 
 const WEEKS = 8;
 const COLUMN_AREA_PX = 96;
 
-type Props = { applications: { status: string; applied_on: string }[] };
+type Props = {
+  applications: { status: string; applied_on: string | null }[];
+};
 
 // Hover and keyboard-focus readout for one mark. Every value it shows is also
 // printed on the chart or in the application list beside it.
@@ -55,6 +57,8 @@ function JobProgress({ applications }: Props) {
   });
   const maxStage = Math.max(1, ...stages.map((stage) => stage.count));
 
+  // Saved postings haven't been applied to, so they're left out here.
+  const applied = applications.filter((app) => app.status !== "saved");
   const reachedInterview = applications.filter(
     (app) => app.status === "interviewing" || app.status === "offer",
   ).length;
@@ -65,7 +69,10 @@ function JobProgress({ applications }: Props) {
     const start = daysAgo(week * 7 + 6);
     const end = daysAgo(week * 7);
     const count = applications.filter(
-      (app) => app.applied_on >= start && app.applied_on <= end,
+      (app) =>
+        app.applied_on !== null &&
+        app.applied_on >= start &&
+        app.applied_on <= end,
     ).length;
     return { week, start, end, count };
   });
@@ -82,7 +89,7 @@ function JobProgress({ applications }: Props) {
         </h4>
         <p className="mt-1 text-xs text-slate-600">
           {reachedInterview > 0
-            ? `${reachedInterview} of ${total} reached an interview or offer.`
+            ? `${reachedInterview} of ${applied.length} applications reached an interview or offer.`
             : "Every application is a step forward, even before you hear back."}
         </p>
 
