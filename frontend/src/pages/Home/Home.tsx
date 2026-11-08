@@ -1,7 +1,8 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import AppHeader from "../../components/AppHeader";
+import { localDate } from "../../dates";
 import { supabase } from "../../supabaseClient";
+import { useProfile } from "../../ProfileProvider";
 
 const MOODS = [
   { value: 1, emoji: "😣", label: "Overwhelmed" },
@@ -31,56 +32,57 @@ const CREW_PULSE = [
 ];
 
 function Home() {
-  const { logout, user } = useAuth0();
+  const { profile } = useProfile();
   const [mood, setMood] = useState<number | null>(null);
   const [note, setNote] = useState("");
   const [doneTasks, setDoneTasks] = useState<string[]>([]);
-  const [savedName, setSavedName] = useState<string | null>(null);
 
-  const auth0Name = user?.given_name ?? user?.nickname;
-  const name = savedName ?? auth0Name;
+  const [winsError, setWinsError] = useState<string | null>(null);
+  const name = profile?.display_name;
   const tasks = mood && mood >= 4 ? HIGH_ENERGY_TASKS : LOW_ENERGY_TASKS;
+  const today = localDate();
 
-  // Creates the person's database row on their first visit.
+  // Ticked tasks are saved as wins, which the Profile page adds up.
   useEffect(() => {
     let isCurrent = true;
 
     supabase
-      .rpc("ensure_user", { new_display_name: auth0Name ?? null })
+      .from("wins")
+      .select("title")
+      .eq("date", today)
       .then(({ data, error }) => {
-        if (error) console.error("Couldn't load your account:", error.message);
-        else if (isCurrent) setSavedName(data);
+        if (!isCurrent) return;
+        if (error) setWinsError(error.message);
+        else setDoneTasks(data.map((win) => win.title));
       });
 
     return () => {
       isCurrent = false;
     };
-  }, [auth0Name]);
+  }, [today]);
 
-  const toggleTask = (task: string) =>
+  const toggleTask = async (task: string) => {
+    const wasDone = doneTasks.includes(task);
+    setWinsError(null);
     setDoneTasks((done) =>
-      done.includes(task) ? done.filter((t) => t !== task) : [...done, task],
+      wasDone ? done.filter((t) => t !== task) : [...done, task],
     );
+
+    const { error } = wasDone
+      ? await supabase.from("wins").delete().eq("date", today).eq("title", task)
+      : await supabase.from("wins").insert({ date: today, title: task });
+
+    if (error) {
+      setWinsError("Couldn't save that. Please try again.");
+      setDoneTasks((done) =>
+        wasDone ? [...done, task] : done.filter((t) => t !== task),
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="mx-auto flex max-w-2xl items-center justify-between px-4 py-6">
-        <Link
-          to="/"
-          className="text-sm font-semibold tracking-tight text-slate-500 hover:text-slate-900"
-        >
-          Layoff Landing Pad
-        </Link>
-        <button
-          type="button"
-          onClick={() =>
-            logout({ logoutParams: { returnTo: window.location.origin } })
-          }
-          className="cursor-pointer text-sm font-medium text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline"
-        >
-          Log out
-        </button>
-      </header>
+      <AppHeader />
 
       <main className="mx-auto max-w-2xl space-y-5 px-4 pb-12">
         <div className="pt-4 pb-3">
@@ -191,6 +193,11 @@ function Home() {
               );
             })}
           </ul>
+          {winsError && (
+            <p role="alert" className="mt-3 text-sm text-red-700">
+              {winsError}
+            </p>
+          )}
         </section>
 
         <section
