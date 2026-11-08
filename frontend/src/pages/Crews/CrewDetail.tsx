@@ -7,6 +7,7 @@ import { EXPERIENCE_LEVELS, FIELDS, labelFor } from "../../profileOptions";
 import { supabase } from "../../supabaseClient";
 import { TagList, VisibilityBadge } from "./CrewCard";
 import CrewForm from "./CrewForm";
+import WorkroomCard from "./WorkroomCard";
 import type { CrewDetails, CrewMember, CrewValues } from "./crewTypes";
 
 function CrewDetail() {
@@ -248,6 +249,8 @@ function CrewDetail() {
 
         <ErrorNote message={error} />
       </Card>
+
+      {isMember && <WorkroomCard crewId={crew.id} />}
 
       {isOwner && crew.visibility === "private" && crew.invite_code && (
         <Card labelledBy="invite-heading">

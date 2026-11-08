@@ -1,10 +1,13 @@
 import { type FormEvent, useState } from "react";
 import { Link } from "react-router";
+import { formatDate } from "../../../dates";
+import { moodInfo } from "../../../moods";
 import { supabase } from "../../../supabaseClient";
 import {
   type CalendarApplication,
+  type CalendarCheckin,
   type CalendarEvent,
-  type CalendarPlanTask,
+  type FollowUp,
   EVENT_KINDS,
   EVENT_NOTES_MAX,
   EVENT_TITLE_MAX,
@@ -12,23 +15,30 @@ import {
   formatEventTime,
   kindInfo,
 } from "./calendarTypes";
+import type { Upcoming } from "./useCalendarData";
 
 const EVENT_COLUMNS = "id, title, kind, event_date, start_time, notes";
 
 function DayDetails({
   date,
   isToday,
+  today,
   events,
-  planTasks,
+  checkin,
+  followUps,
   applications,
+  upcoming,
   onAdded,
   onRemoved,
 }: {
   date: string;
   isToday: boolean;
+  today: string;
   events: CalendarEvent[];
-  planTasks: CalendarPlanTask[];
+  checkin: CalendarCheckin | undefined;
+  followUps: FollowUp[];
   applications: CalendarApplication[];
+  upcoming: Upcoming[];
   onAdded: (event: CalendarEvent) => void;
   onRemoved: (id: string) => void;
 }) {
@@ -41,7 +51,11 @@ function DayDetails({
     day: "numeric",
   });
   const isEmpty =
-    events.length === 0 && planTasks.length === 0 && applications.length === 0;
+    events.length === 0 &&
+    followUps.length === 0 &&
+    applications.length === 0 &&
+    !checkin;
+  const mood = moodInfo(checkin?.mood);
 
   const remove = async (id: string) => {
     setError(null);
@@ -69,6 +83,27 @@ function DayDetails({
           </button>
         )}
       </div>
+
+      {mood ? (
+        <p className="mt-3 flex items-start gap-2 rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          <span aria-hidden="true" className="text-lg leading-5">
+            {mood.emoji}
+          </span>
+          <span>
+            <span className="font-medium text-slate-900">
+              Feeling {mood.label.toLowerCase()}
+            </span>
+            {checkin?.note && <> · “{checkin.note}”</>}
+          </span>
+        </p>
+      ) : (
+        isToday && (
+          <p className="mt-3 text-sm text-slate-500">
+            No check-in yet today. Pick how you're feeling above and it'll show
+            here.
+          </p>
+        )
+      )}
 
       {error && (
         <p role="alert" className="mt-3 text-sm text-red-700">
@@ -137,35 +172,28 @@ function DayDetails({
         </ul>
       )}
 
-      {planTasks.length > 0 && (
+      {followUps.length > 0 && (
         <div className="mt-4">
           <div className="flex items-center justify-between gap-3">
             <h4 className="text-xs font-medium tracking-wide text-slate-500 uppercase">
-              Your plan · {planTasks.filter((t) => t.done).length} of{" "}
-              {planTasks.length} done
+              Time to follow up
             </h4>
             <Link
-              to="/plan"
+              to="/profile"
               className="text-xs font-medium text-teal-800 underline-offset-4 hover:underline"
             >
-              Open plan
+              Update status
             </Link>
           </div>
-          <ul className="mt-2 space-y-1 text-sm">
-            {planTasks.map((task) => (
-              <li key={task.id} className="flex items-start gap-2">
-                <span aria-hidden="true" className="text-slate-400">
-                  {task.done ? "✓" : "○"}
-                </span>
-                <span
-                  className={
-                    task.done ? "text-slate-400 line-through" : "text-slate-800"
-                  }
-                >
-                  <span className="sr-only">
-                    {task.done ? "Done: " : "To do: "}
-                  </span>
-                  {task.title}
+          <ul className="mt-2 space-y-1 text-sm text-slate-800">
+            {followUps.map((f) => (
+              <li key={f.id}>
+                <span aria-hidden="true">↩ </span>
+                {f.job_title}{" "}
+                <span className="text-slate-500">at {f.company}</span>
+                <span className="text-slate-500">
+                  {" "}
+                  · sent {formatDate(f.applied_on)}
                 </span>
               </li>
             ))}
@@ -187,6 +215,86 @@ function DayDetails({
             ))}
           </ul>
         </div>
+      )}
+
+      <ComingUp upcoming={upcoming} today={today} />
+    </div>
+  );
+}
+
+// The next two weeks of events, plus follow-ups that are due, whatever month
+// is on screen.
+function ComingUp({
+  upcoming,
+  today,
+}: {
+  upcoming: Upcoming[];
+  today: string;
+}) {
+  return (
+    <div className="mt-6 border-t border-slate-100 pt-4">
+      <h4 className="text-xs font-medium tracking-wide text-slate-500 uppercase">
+        Coming up
+      </h4>
+      {upcoming.length === 0 ? (
+        <p className="mt-2 text-sm text-slate-500">
+          Nothing in the next two weeks. Add interviews and deadlines as they
+          come up.
+        </p>
+      ) : (
+        <ul className="mt-2 space-y-2">
+          {upcoming.map((item) => {
+            const when =
+              item.date < today
+                ? "Overdue"
+                : item.date === today
+                  ? "Today"
+                  : formatDate(item.date);
+            if (item.type === "event") {
+              const kind = kindInfo(item.event.kind);
+              const time = formatEventTime(item.event.start_time);
+              return (
+                <li
+                  key={`e-${item.event.id}`}
+                  className="flex items-start gap-2.5 text-sm"
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`mt-1.5 size-2 shrink-0 rounded-full ${kind.dot}`}
+                  />
+                  <span className="min-w-0">
+                    <span className="block truncate text-slate-900">
+                      {item.event.title}
+                    </span>
+                    <span className="block text-xs text-slate-500">
+                      {when}
+                      {time && ` · ${time}`} · {kind.label}
+                    </span>
+                  </span>
+                </li>
+              );
+            }
+            return (
+              <li
+                key={`f-${item.followUp.id}`}
+                className="flex items-start gap-2.5 text-sm"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-1.5 size-2 shrink-0 rounded-full border-2 border-slate-500"
+                />
+                <span className="min-w-0">
+                  <span className="block truncate text-slate-900">
+                    Follow up: {item.followUp.job_title}
+                  </span>
+                  <span className="block text-xs text-slate-500">
+                    {when} · {item.followUp.company}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </div>
   );

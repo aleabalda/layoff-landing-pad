@@ -157,9 +157,7 @@ function Crews() {
               <select
                 id="crew-field-filter"
                 value={fieldFilter ?? ""}
-                onChange={(event) =>
-                  setFieldFilter(event.target.value || null)
-                }
+                onChange={(event) => setFieldFilter(event.target.value || null)}
                 className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
               >
                 <option value="">All fields</option>

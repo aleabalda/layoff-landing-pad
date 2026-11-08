@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { PLAN_TASKS_CHANGED } from "../../../plan/usePlanTasks";
-import { dateForPlanDay } from "../../../plan/plan";
+import { addDays, localDate } from "../../../dates";
+import { CHECKIN_CHANGED } from "../../../moods";
 import { supabase } from "../../../supabaseClient";
-import type {
-  CalendarApplication,
-  CalendarEvent,
-  CalendarPlanTask,
+import {
+  type CalendarApplication,
+  type CalendarCheckin,
+  type CalendarEvent,
+  FOLLOW_UP_AFTER_DAYS,
+  type FollowUp,
 } from "./calendarTypes";
 
 const groupBy = <T>(items: T[], key: (item: T) => string) => {
@@ -14,17 +16,25 @@ const groupBy = <T>(items: T[], key: (item: T) => string) => {
   return groups;
 };
 
+const EVENT_COLUMNS = "id, title, kind, event_date, start_time, notes";
+const UPCOMING_DAYS = 14;
+const UPCOMING_LIMIT = 6;
+
+type Upcoming =
+  | { type: "event"; date: string; event: CalendarEvent }
+  | { type: "followUp"; date: string; followUp: FollowUp };
+
 // Everything the calendar shows between two local dates (inclusive), grouped
-// by date. Plan tasks are loaded once for the whole plan.
-export function useCalendarData(
-  from: string,
-  to: string,
-  planStartDate: string | null | undefined,
-) {
+// by date, plus a short "coming up" list that ignores the month on screen.
+export function useCalendarData(from: string, to: string) {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [applications, setApplications] = useState<CalendarApplication[]>([]);
-  const [planTasks, setPlanTasks] = useState<CalendarPlanTask[]>([]);
+  const [followUps, setFollowUps] = useState<FollowUp[]>([]);
+  const [checkins, setCheckins] = useState<CalendarCheckin[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
+  const [openFollowUps, setOpenFollowUps] = useState<FollowUp[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [today] = useState(() => localDate());
 
   useEffect(() => {
     let isCurrent = true;
@@ -32,15 +42,16 @@ export function useCalendarData(
     Promise.all([
       supabase
         .from("calendar_events")
-        .select("id, title, kind, event_date, start_time, notes")
+        .select(EVENT_COLUMNS)
         .gte("event_date", from)
         .lte("event_date", to)
         .order("event_date")
         .order("start_time", { nullsFirst: true }),
+      // Sent this month, or due a follow-up this month.
       supabase
         .from("job_applications")
-        .select("id, company, job_title, applied_on")
-        .gte("applied_on", from)
+        .select("id, company, job_title, applied_on, status")
+        .gte("applied_on", addDays(from, -FOLLOW_UP_AFTER_DAYS))
         .lte("applied_on", to),
     ]).then(([eventsResult, appsResult]) => {
       if (!isCurrent) return;
@@ -51,7 +62,19 @@ export function useCalendarData(
       }
       setError(null);
       setEvents(eventsResult.data as CalendarEvent[]);
-      setApplications(appsResult.data as CalendarApplication[]);
+      const apps = appsResult.data as (CalendarApplication & {
+        status: string;
+      })[];
+      setApplications(apps.filter((a) => a.applied_on >= from));
+      setFollowUps(
+        apps
+          .filter((a) => a.status === "applied")
+          .map((a) => ({
+            ...a,
+            due: addDays(a.applied_on, FOLLOW_UP_AFTER_DAYS),
+          }))
+          .filter((f) => f.due >= from && f.due <= to),
+      );
     });
 
     return () => {
@@ -59,43 +82,103 @@ export function useCalendarData(
     };
   }, [from, to]);
 
-  const loadPlan = useCallback(async () => {
-    if (!planStartDate) return;
+  const loadCheckins = useCallback(async () => {
     const { data, error } = await supabase
-      .from("tasks")
-      .select("id, week, day, title, done")
-      .not("day", "is", null)
-      .order("position");
+      .from("checkins")
+      .select("date, mood, note")
+      .gte("date", from)
+      .lte("date", to);
     if (error) setError(error.message);
-    else setPlanTasks(data as CalendarPlanTask[]);
-  }, [planStartDate]);
+    else setCheckins(data as CalendarCheckin[]);
+  }, [from, to]);
 
-  // Reload when a task is ticked elsewhere on the page (Today's small wins).
+  // Reload when today's check-in is saved on the same page.
   useEffect(() => {
-    loadPlan();
-    window.addEventListener(PLAN_TASKS_CHANGED, loadPlan);
-    return () => window.removeEventListener(PLAN_TASKS_CHANGED, loadPlan);
-  }, [loadPlan]);
+    loadCheckins();
+    window.addEventListener(CHECKIN_CHANGED, loadCheckins);
+    return () => window.removeEventListener(CHECKIN_CHANGED, loadCheckins);
+  }, [loadCheckins]);
 
-  const addEvent = (event: CalendarEvent) =>
-    setEvents((current) =>
-      [...current, event].sort(
-        (a, b) =>
-          a.event_date.localeCompare(b.event_date) ||
-          (a.start_time ?? "").localeCompare(b.start_time ?? ""),
-      ),
+  // "Coming up": the next two weeks of events, plus any follow-ups that are
+  // due or overdue, whatever month is on screen.
+  const loadUpcoming = useCallback(async () => {
+    const [eventsResult, appsResult] = await Promise.all([
+      supabase
+        .from("calendar_events")
+        .select(EVENT_COLUMNS)
+        .gte("event_date", today)
+        .lte("event_date", addDays(today, UPCOMING_DAYS))
+        .order("event_date")
+        .order("start_time", { nullsFirst: true })
+        .limit(UPCOMING_LIMIT),
+      supabase
+        .from("job_applications")
+        .select("id, company, job_title, applied_on")
+        .eq("status", "applied")
+        .lte("applied_on", addDays(today, UPCOMING_DAYS - FOLLOW_UP_AFTER_DAYS))
+        .order("applied_on")
+        .limit(UPCOMING_LIMIT),
+    ]);
+    const failed = eventsResult.error ?? appsResult.error;
+    if (failed) {
+      setError(failed.message);
+      return;
+    }
+    setUpcomingEvents(eventsResult.data as CalendarEvent[]);
+    setOpenFollowUps(
+      (appsResult.data as CalendarApplication[]).map((a) => ({
+        ...a,
+        due: addDays(a.applied_on, FOLLOW_UP_AFTER_DAYS),
+      })),
     );
-  const removeEvent = (id: string) =>
+  }, [today]);
+
+  useEffect(() => {
+    loadUpcoming();
+  }, [loadUpcoming]);
+
+  const sortEvents = (list: CalendarEvent[]) =>
+    [...list].sort(
+      (a, b) =>
+        a.event_date.localeCompare(b.event_date) ||
+        (a.start_time ?? "").localeCompare(b.start_time ?? ""),
+    );
+
+  const addEvent = (event: CalendarEvent) => {
+    setEvents((current) => sortEvents([...current, event]));
+    loadUpcoming();
+  };
+  const removeEvent = (id: string) => {
     setEvents((current) => current.filter((e) => e.id !== id));
+    setUpcomingEvents((current) => current.filter((e) => e.id !== id));
+  };
+
+  const upcoming: Upcoming[] = [
+    ...upcomingEvents.map((event) => ({
+      type: "event" as const,
+      date: event.event_date,
+      event,
+    })),
+    ...openFollowUps.map((followUp) => ({
+      type: "followUp" as const,
+      date: followUp.due,
+      followUp,
+    })),
+  ]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, UPCOMING_LIMIT);
 
   return {
     eventsByDate: groupBy(events, (e) => e.event_date),
     applicationsByDate: groupBy(applications, (a) => a.applied_on),
-    planByDate: planStartDate
-      ? groupBy(planTasks, (t) => dateForPlanDay(planStartDate, t.week, t.day))
-      : {},
+    followUpsByDate: groupBy(followUps, (f) => f.due),
+    checkinByDate: Object.fromEntries(checkins.map((c) => [c.date, c])),
+    upcoming,
+    today,
     error,
     addEvent,
     removeEvent,
   };
 }
+
+export type { Upcoming };

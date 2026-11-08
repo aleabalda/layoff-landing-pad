@@ -1,12 +1,13 @@
 import { type KeyboardEvent, useRef, useState } from "react";
 import { addDays, localDate } from "../../../dates";
-import { useProfile } from "../../../ProfileProvider";
+import { moodInfo } from "../../../moods";
 import DayDetails from "./DayDetails";
 import { EVENT_KINDS, kindInfo } from "./calendarTypes";
 import { useCalendarData } from "./useCalendarData";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MAX_DOTS = 3;
+// Event lines shown per day before "+N".
+const MAX_LINES = 3;
 
 // The first of a month as "YYYY-MM-01", from any date in it.
 const monthOf = (isoDate: string) => `${isoDate.slice(0, 7)}-01`;
@@ -21,7 +22,6 @@ function monthGrid(monthStart: string) {
 }
 
 function Calendar({ className = "" }: { className?: string }) {
-  const { profile } = useProfile();
   const [today] = useState(() => localDate());
   const [selected, setSelected] = useState(today);
   const [month, setMonth] = useState(() => monthOf(today));
@@ -31,11 +31,13 @@ function Calendar({ className = "" }: { className?: string }) {
   const {
     eventsByDate,
     applicationsByDate,
-    planByDate,
+    followUpsByDate,
+    checkinByDate,
+    upcoming,
     error,
     addEvent,
     removeEvent,
-  } = useCalendarData(days[0], days[days.length - 1], profile?.plan_start_date);
+  } = useCalendarData(days[0], days[days.length - 1]);
 
   const [year, monthNumber] = month.split("-").map(Number);
   const monthLabel = new Date(year, monthNumber - 1, 1).toLocaleDateString(
@@ -89,7 +91,7 @@ function Calendar({ className = "" }: { className?: string }) {
             Calendar
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Interviews, deadlines and your plan, all in one place.
+            Interviews, deadlines, follow-ups and how you’ve been feeling.
           </p>
         </div>
         <div className="flex items-center gap-1">
@@ -150,8 +152,8 @@ function Calendar({ className = "" }: { className?: string }) {
             {days.map((date) => {
               const events = eventsByDate[date] ?? [];
               const apps = applicationsByDate[date] ?? [];
-              const plan = planByDate[date] ?? [];
-              const planDone = plan.filter((t) => t.done).length;
+              const followUps = followUpsByDate[date] ?? [];
+              const mood = moodInfo(checkinByDate[date]?.mood);
               const inMonth = monthOf(date) === month;
               const isToday = date === today;
               const isSelected = date === selected;
@@ -164,8 +166,10 @@ function Calendar({ className = "" }: { className?: string }) {
                   day: "numeric",
                 }),
                 isToday && "today",
+                mood && `feeling ${mood.label.toLowerCase()}`,
                 ...events.map((e) => `${kindInfo(e.kind).label}: ${e.title}`),
-                plan.length > 0 && `plan: ${planDone} of ${plan.length} done`,
+                followUps.length > 0 &&
+                  `${followUps.length} follow-up${followUps.length === 1 ? "" : "s"} due`,
                 apps.length > 0 &&
                   `${apps.length} application${apps.length === 1 ? "" : "s"} sent`,
               ]
@@ -182,7 +186,7 @@ function Calendar({ className = "" }: { className?: string }) {
                   tabIndex={isSelected ? 0 : -1}
                   onClick={() => select(date)}
                   onKeyDown={handleKeyDown}
-                  className={`flex min-h-12 cursor-pointer flex-col @[28rem]:min-h-16 items-stretch rounded-lg border p-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-600 ${
+                  className={`flex min-h-16 cursor-pointer flex-col @[28rem]:min-h-20 items-stretch rounded-lg border p-1.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-teal-600 ${
                     isSelected
                       ? "border-teal-600 bg-teal-50"
                       : inMonth
@@ -190,40 +194,54 @@ function Calendar({ className = "" }: { className?: string }) {
                         : "border-transparent hover:border-slate-200"
                   }`}
                 >
-                  <span
-                    className={`flex size-6 items-center justify-center rounded-full text-xs tabular-nums ${
-                      isToday
-                        ? "bg-teal-700 font-semibold text-white"
-                        : inMonth
-                          ? "font-medium text-slate-800"
-                          : "text-slate-400"
-                    }`}
-                  >
-                    {dayNumber}
+                  {/* Top: the date, and applications sent on wide calendars. */}
+                  <span className="flex items-start justify-between gap-0.5">
+                    <span
+                      className={`flex size-6 items-center justify-center rounded-full text-xs tabular-nums ${
+                        isToday
+                          ? "bg-teal-700 font-semibold text-white"
+                          : inMonth
+                            ? "font-medium text-slate-800"
+                            : "text-slate-400"
+                      }`}
+                    >
+                      {dayNumber}
+                    </span>
+                    {apps.length > 0 && (
+                      <span className="hidden text-[10px] leading-6 text-slate-500 tabular-nums @[28rem]:inline">
+                        📨{apps.length}
+                      </span>
+                    )}
                   </span>
 
-                  {events.length > 0 && (
-                    <span className="mt-1 flex flex-wrap items-center gap-1">
-                      {events.slice(0, MAX_DOTS).map((e) => (
+                  {/* Middle: that day's mood, centered. */}
+                  <span
+                    aria-hidden="true"
+                    className="flex flex-1 items-center justify-center text-xl leading-none @[28rem]:text-2xl"
+                  >
+                    {mood?.emoji}
+                  </span>
+
+                  {/* Bottom: a line per event, across the day. */}
+                  {(events.length > 0 || followUps.length > 0) && (
+                    <span className="mt-1 flex w-full flex-col gap-0.5">
+                      {events.slice(0, MAX_LINES).map((e) => (
                         <span
                           key={e.id}
-                          className={`size-2 rounded-full ring-2 ring-white ${kindInfo(e.kind).dot}`}
+                          className={`block h-1 w-full rounded-full @[28rem]:h-1.5 ${kindInfo(e.kind).dot}`}
                         />
                       ))}
-                      {events.length > MAX_DOTS && (
-                        <span className="text-[10px] leading-none text-slate-500">
-                          +{events.length - MAX_DOTS}
+                      {followUps.length > 0 && (
+                        // Dashed, so follow-ups differ by shape, not just color.
+                        <span className="block w-full border-t-2 border-dashed border-slate-500" />
+                      )}
+                      {events.length > MAX_LINES && (
+                        <span className="text-right text-[10px] leading-none text-slate-500">
+                          +{events.length - MAX_LINES}
                         </span>
                       )}
                     </span>
                   )}
-
-                  <span className="mt-auto hidden items-center justify-between gap-1 pt-1 text-[10px] leading-none text-slate-500 tabular-nums @[28rem]:flex">
-                    <span>
-                      {plan.length > 0 ? `${planDone}/${plan.length}` : ""}
-                    </span>
-                    <span>{apps.length > 0 ? `📨${apps.length}` : ""}</span>
-                  </span>
                 </button>
               );
             })}
@@ -235,15 +253,20 @@ function Calendar({ className = "" }: { className?: string }) {
             {EVENT_KINDS.map((kind) => (
               <li key={kind.value} className="flex items-center gap-1.5">
                 <span
-                  className={`size-2 rounded-full ${kind.dot}`}
+                  className={`h-1.5 w-4 rounded-full ${kind.dot}`}
                   aria-hidden="true"
                 />
                 {kind.label}
               </li>
             ))}
-            <li className="hidden @[28rem]:list-item">
-              <span className="tabular-nums">2/3</span> plan tasks done
+            <li className="flex items-center gap-1.5">
+              <span
+                className="w-4 border-t-2 border-dashed border-slate-500"
+                aria-hidden="true"
+              />
+              Follow-up due
             </li>
+            <li>🙂 your check-in</li>
             <li className="hidden @[28rem]:list-item">📨 applications sent</li>
           </ul>
         </div>
@@ -251,9 +274,12 @@ function Calendar({ className = "" }: { className?: string }) {
         <DayDetails
           date={selected}
           isToday={selected === today}
+          today={today}
           events={eventsByDate[selected] ?? []}
-          planTasks={planByDate[selected] ?? []}
+          checkin={checkinByDate[selected]}
+          followUps={followUpsByDate[selected] ?? []}
           applications={applicationsByDate[selected] ?? []}
+          upcoming={upcoming}
           onAdded={addEvent}
           onRemoved={removeEvent}
         />

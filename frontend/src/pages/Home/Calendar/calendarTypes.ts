@@ -23,13 +23,23 @@ export type CalendarEvent = {
   notes: string | null;
 };
 
-export type CalendarPlanTask = {
-  id: string;
-  week: number;
-  day: number;
-  title: string;
-  done: boolean;
+export type CalendarCheckin = {
+  date: string;
+  mood: number;
+  note: string | null;
 };
+
+// An application still marked "Applied" a week after it was sent.
+export type FollowUp = {
+  id: string;
+  company: string;
+  job_title: string;
+  applied_on: string;
+  due: string;
+};
+
+// How long after applying to suggest following up.
+export const FOLLOW_UP_AFTER_DAYS = 7;
 
 export type CalendarApplication = {
   id: string;

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router";
 import AppHeader from "../../components/AppHeader";
 import { Card, ErrorNote } from "../../components/Card";
@@ -12,24 +11,23 @@ import PlanTaskList from "../../plan/PlanTaskList";
 import { planDayNumber, weekAndDay } from "../../plan/plan";
 import { PLAN_LENGTH_DAYS, PLAN_WEEKS } from "../../plan/planTemplate";
 import { usePlanTasks } from "../../plan/usePlanTasks";
-
-// Values must match the check on checkins.mood (1-6) in the database.
-const MOODS = [
-  { value: 1, emoji: "😣", label: "Overwhelmed" },
-  { value: 2, emoji: "😔", label: "Low" },
-  { value: 3, emoji: "😐", label: "Okay" },
-  { value: 4, emoji: "🙂", label: "Good" },
-  { value: 5, emoji: "😊", label: "Hopeful" },
-  { value: 6, emoji: "🤩", label: "Excited" },
-];
+import { MOODS } from "../../moods";
+import SiteFooter from "../../components/SiteFooter";
+import { useTodayCheckin } from "./useTodayCheckin";
 
 const LINK_CLASSES =
   "shrink-0 text-sm font-medium text-teal-800 underline-offset-4 hover:underline";
 
 function Home() {
   const { profile } = useProfile();
-  const [mood, setMood] = useState<number | null>(null);
-  const [note, setNote] = useState("");
+  const {
+    mood,
+    setMood,
+    note,
+    setNote,
+    saveNote,
+    error: checkinError,
+  } = useTodayCheckin();
   const name = profile?.display_name;
 
   return (
@@ -102,9 +100,17 @@ function Home() {
                     type="text"
                     value={note}
                     onChange={(event) => setNote(event.target.value)}
+                    onBlur={saveNote}
+                    maxLength={280}
                     className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
                   />
                 </div>
+              )}
+
+              {checkinError && (
+                <p role="alert" className="mt-3 text-sm text-red-700">
+                  {checkinError}
+                </p>
               )}
 
               {mood === 1 && (
@@ -140,25 +146,7 @@ function Home() {
           </aside>
         </div>
 
-        <footer className="px-1 pt-3 text-sm text-slate-600">
-          <p>
-            <span className="font-medium text-slate-800">
-              Having a hard time?
-            </span>{" "}
-            Call or text{" "}
-            <a href="tel:988" className="font-medium text-teal-800 underline">
-              9-8-8
-            </a>{" "}
-            any time for the Suicide Crisis Helpline, or dial{" "}
-            <a href="tel:211" className="font-medium text-teal-800 underline">
-              211
-            </a>{" "}
-            for local community services.
-          </p>
-          <p className="mt-2 text-slate-500">
-            Landing Pad is here to support you, but it isn't therapy.
-          </p>
-        </footer>
+        <SiteFooter />
       </main>
     </div>
   );

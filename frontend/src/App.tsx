@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense, lazy } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router";
 import { useProfile } from "./ProfileProvider";
 import Login from "./pages/Auth/Login";
@@ -12,6 +12,9 @@ import Messages from "./pages/Messages/Messages";
 import Onboarding from "./pages/Onboarding/Onboarding";
 import Plan from "./pages/Plan/Plan";
 import Profile from "./pages/Profile/Profile";
+
+// LiveKit is large, so the workroom only downloads when someone opens one.
+const Workroom = lazy(() => import("./pages/Workroom/Workroom"));
 
 function CenteredMessage({ children }: { children: ReactNode }) {
   return (
@@ -93,6 +96,14 @@ function App() {
         element={requireOnboarded(<Messages />)}
       />
       <Route path="/crews/:crewId" element={requireOnboarded(<CrewDetail />)} />
+      <Route
+        path="/crews/:crewId/workroom"
+        element={requireOnboarded(
+          <Suspense fallback={<CenteredMessage>Loading...</CenteredMessage>}>
+            <Workroom />
+          </Suspense>,
+        )}
+      />
       <Route
         path="/login"
         element={

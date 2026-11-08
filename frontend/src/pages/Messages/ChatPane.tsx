@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router";
 import { formatClockTime, formatDayHeading, localDate } from "../../dates";
 import { supabase } from "../../supabaseClient";
+import WorkroomBanner from "../Workroom/WorkroomBanner";
 import AttachmentView from "./AttachmentView";
 import {
   ATTACHMENT_ACCEPT,
@@ -369,7 +370,7 @@ function ChatPane({
         >
           ←
         </Link>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h2 className="truncate font-semibold tracking-tight text-slate-900">
             {header?.title ?? "Loading..."}
           </h2>
@@ -387,7 +388,17 @@ function ChatPane({
             </p>
           )}
         </div>
+        {kind === "crew" && (
+          <Link
+            to={`/crews/${id}/workroom`}
+            className="shrink-0 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Workroom
+          </Link>
+        )}
       </div>
+
+      {kind === "crew" && <WorkroomBanner crewId={id} />}
 
       <div
         ref={scrollRef}
