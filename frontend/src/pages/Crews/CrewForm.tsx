@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { ErrorNote } from "../../components/Card";
 import TagPicker, { toggleInList } from "../../components/TagPicker";
+import { FIELDS } from "../../profileOptions";
 import {
   CREW_DESCRIPTION_MAX,
   CREW_NAME_MAX,
@@ -29,6 +30,7 @@ const EMPTY: CrewValues = {
   description: "",
   visibility: "public",
   tags: [],
+  target_field: "",
 };
 
 function CrewForm({
@@ -105,6 +107,34 @@ function CrewForm({
           onChange={(event) => set("name", event.target.value)}
           className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
         />
+      </div>
+
+      <div className="mt-5">
+        <label
+          htmlFor="crew-target-field"
+          className="text-sm font-medium text-slate-900"
+        >
+          What work field should this crew focus on?
+        </label>
+        <select
+          id="crew-target-field"
+          value={values.target_field}
+          required
+          onChange={(event) => set("target_field", event.target.value)}
+          className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
+        >
+          <option value="" disabled>
+            Choose a work field
+          </option>
+          {FIELDS.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1 text-sm text-slate-500">
+          People can find this crew by the field they selected on their profile.
+        </p>
       </div>
 
       <div className="mt-5">

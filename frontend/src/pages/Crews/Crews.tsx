@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import AppHeader from "../../components/AppHeader";
 import { ErrorNote } from "../../components/Card";
 import { useProfile } from "../../ProfileProvider";
-import { ALL_TAGS } from "../../profileOptions";
+import { ALL_TAGS, FIELDS, labelFor } from "../../profileOptions";
 import { supabase } from "../../supabaseClient";
 import CrewCard from "./CrewCard";
 import CrewForm from "./CrewForm";
@@ -17,13 +17,23 @@ function Crews() {
   const [crews, setCrews] = useState<CrewSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [fieldFilter, setFieldFilter] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
   const [joining, setJoining] = useState<string | null>(null);
 
   useEffect(() => {
     let isCurrent = true;
 
-    supabase.rpc("list_crews").then(({ data, error }) => {
+    setCrews(null);
+    setError(null);
+    const request = fieldFilter
+      ? supabase.rpc("list_crews_by_field", {
+          requested_field: fieldFilter,
+        })
+      : supabase.rpc("list_crews");
+
+    request.then(({ data, error }) => {
       if (!isCurrent) return;
       if (error) setError(error.message);
       else setCrews(data);
@@ -32,7 +42,7 @@ function Crews() {
     return () => {
       isCurrent = false;
     };
-  }, []);
+  }, [fieldFilter]);
 
   const createGroup = async (values: CrewValues) => {
     const { data, error } = await supabase.rpc("create_crew", {
@@ -40,6 +50,7 @@ function Crews() {
       new_description: values.description,
       new_visibility: values.visibility,
       new_tags: values.tags,
+      new_target_field: values.target_field,
     });
     if (error) return error.message;
     navigate(`/crews/${data}`);
@@ -65,12 +76,24 @@ function Crews() {
   const discover = (crews ?? [])
     .filter((crew) => !crew.my_role)
     .sort((a, b) => sharedCount(b) - sharedCount(a));
-  const filterTags = ALL_TAGS.filter((tag) =>
-    discover.some((crew) => crew.tags.includes(tag.value)),
-  );
-  const shown = tagFilter
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const tagFiltered = tagFilter
     ? discover.filter((crew) => crew.tags.includes(tagFilter))
     : discover;
+  const shown = tagFiltered.filter((crew) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      [
+        crew.name,
+        crew.description ?? "",
+        labelFor(FIELDS, crew.target_field) ?? "",
+        ...crew.tags.map((tag) => labelFor(ALL_TAGS, tag) ?? tag),
+      ]
+        .join(" ")
+        .toLocaleLowerCase()
+        .includes(normalizedSearch);
+    return matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -98,6 +121,77 @@ function Crews() {
             {isCreating ? "Creating a crew..." : "Create a crew"}
           </button>
           <JoinWithCode />
+          <section
+            aria-labelledby="crew-filters-heading"
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <h2
+              id="crew-filters-heading"
+              className="font-semibold tracking-tight text-slate-900"
+            >
+              Find a crew
+            </h2>
+            <div className="mt-4">
+              <label
+                htmlFor="crew-search"
+                className="text-sm font-medium text-slate-700"
+              >
+                Search
+              </label>
+              <input
+                id="crew-search"
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Crew name, description, or interest"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
+              />
+            </div>
+            <div className="mt-4">
+              <label
+                htmlFor="crew-field-filter"
+                className="text-sm font-medium text-slate-700"
+              >
+                Filter by work field
+              </label>
+              <select
+                id="crew-field-filter"
+                value={fieldFilter ?? ""}
+                onChange={(event) =>
+                  setFieldFilter(event.target.value || null)
+                }
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
+              >
+                <option value="">All fields</option>
+                {FIELDS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-4">
+              <label
+                htmlFor="crew-tag-filter"
+                className="text-sm font-medium text-slate-700"
+              >
+                Filter by interest
+              </label>
+              <select
+                id="crew-tag-filter"
+                value={tagFilter ?? ""}
+                onChange={(event) => setTagFilter(event.target.value || null)}
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-teal-600 focus:outline-none"
+              >
+                <option value="">All interests</option>
+                {ALL_TAGS.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </section>
         </aside>
 
         <div className="min-w-0 space-y-8 lg:pt-4">
@@ -149,37 +243,11 @@ function Crews() {
                   Interests you share are highlighted.
                 </p>
 
-                {filterTags.length > 0 && (
-                  <div
-                    role="group"
-                    aria-label="Filter by interest"
-                    className="mt-4 flex flex-wrap gap-2"
-                  >
-                    {[{ value: null, label: "All" }, ...filterTags].map(
-                      ({ value, label }) => (
-                        <button
-                          key={value ?? "all"}
-                          type="button"
-                          aria-pressed={tagFilter === value}
-                          onClick={() => setTagFilter(value)}
-                          className={`cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
-                            tagFilter === value
-                              ? "border-slate-900 bg-slate-900 text-white"
-                              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                )}
-
                 {shown.length === 0 ? (
                   <p className="mt-4 text-sm text-slate-500">
                     {discover.length === 0
                       ? "No other public crews yet. Why not start one?"
-                      : "No crews with that interest yet."}
+                      : "No crews match your search and filters."}
                   </p>
                 ) : (
                   <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">

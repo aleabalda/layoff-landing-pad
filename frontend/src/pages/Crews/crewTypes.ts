@@ -7,6 +7,7 @@ export type CrewSummary = {
   description: string | null;
   visibility: Visibility;
   tags: string[];
+  target_field: string | null;
   member_count: number;
   my_role: CrewRole | null;
   created_at: string;
@@ -30,6 +31,7 @@ export type CrewValues = {
   description: string;
   visibility: Visibility;
   tags: string[];
+  target_field: string;
 };
 
 // Must match the checks in supabase/migrations/20261108020000_groups.sql

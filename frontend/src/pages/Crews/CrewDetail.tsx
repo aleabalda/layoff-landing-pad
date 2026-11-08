@@ -110,6 +110,7 @@ function CrewDetail() {
       new_description: values.description,
       new_visibility: values.visibility,
       new_tags: values.tags,
+      new_target_field: values.target_field,
     });
     if (error) return error.message;
     await refresh();
@@ -164,6 +165,7 @@ function CrewDetail() {
             description: crew.description ?? "",
             visibility: crew.visibility,
             tags: crew.tags,
+            target_field: crew.target_field ?? "",
           }}
           onSubmit={save}
           onCancel={() => setIsEditing(false)}
@@ -235,6 +237,12 @@ function CrewDetail() {
         )}
 
         <div className="mt-4">
+          <p className="text-sm text-slate-600">
+            Focus:{" "}
+            <span className="font-medium text-slate-800">
+              {labelFor(FIELDS, crew.target_field) ?? "Any work field"}
+            </span>
+          </p>
           <TagList tags={crew.tags} highlight={profile?.tags} />
         </div>
 

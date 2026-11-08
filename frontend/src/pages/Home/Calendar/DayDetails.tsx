@@ -54,7 +54,7 @@ function DayDetails({
   };
 
   return (
-    <div className="mt-6 border-t border-slate-100 pt-5">
+    <div className="@container mt-6 border-t border-slate-100 pt-5 @xl:mt-0 @xl:border-t-0 @xl:border-l @xl:pt-0 @xl:pl-5">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-sm font-semibold text-slate-900">
           {isToday ? `Today · ${heading}` : heading}
@@ -260,7 +260,7 @@ function AddEventForm({
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 @sm:grid-cols-3">
         <div>
           <label
             htmlFor="event-kind"

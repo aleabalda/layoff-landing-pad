@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { ALL_TAGS, labelFor } from "../../profileOptions";
+import { ALL_TAGS, FIELDS, labelFor } from "../../profileOptions";
 import type { CrewSummary } from "./crewTypes";
 
 export function VisibilityBadge({ visibility }: { visibility: string }) {
   return visibility === "private" ? (
     <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] font-medium text-white">
-      🔒 Private
+      Private
     </span>
   ) : (
     <span className="rounded-full bg-teal-50 px-2 py-0.5 text-[11px] font-medium text-teal-900">
@@ -68,6 +68,12 @@ function CrewCard({
       <p className="mt-1 text-xs text-slate-500">
         {crew.member_count} {crew.member_count === 1 ? "member" : "members"}
         {crew.my_role === "owner" && " · You run this crew"}
+      </p>
+      <p className="mt-2 text-xs text-slate-600">
+        Focus:{" "}
+        <span className="font-medium text-slate-800">
+          {labelFor(FIELDS, crew.target_field) ?? "Any work field"}
+        </span>
       </p>
       {crew.description && (
         <p className="mt-3 line-clamp-3 text-sm text-slate-700">

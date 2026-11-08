@@ -20,7 +20,7 @@ function SimilarPeople() {
     let isCurrent = true;
 
     supabase
-      .rpc("suggest_people", { max_results: 5 })
+      .rpc("suggest_people", { max_results: 4 })
       .then(({ data, error }) => {
         if (!isCurrent) return;
         if (error) setError(error.message);

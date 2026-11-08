@@ -47,13 +47,13 @@ function Home() {
         </div>
 
         {/*
-          The 30-day plan and calendar are the main, widest column.
-            1280px+:     today | calendar and plan (2x wide) | people
-            1024-1279px: calendar and plan | today, then people
-            Phones:      today, calendar and plan, people
+          The 30-day plan and calendar fill the space to the right of today.
+            1280px+:     today and similar people, then friends | calendar and plan
+            1024-1279px: calendar and plan | today, then friends
+            Phones:      today, calendar and plan, friends
           The mood buttons wrap to fit their card, so "today" can be narrow.
         */}
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(20rem,1fr)_minmax(0,2fr)_minmax(19rem,1fr)]">
+        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] xl:items-stretch xl:grid-cols-[minmax(20rem,1fr)_minmax(0,3fr)]">
           <div className="min-w-0 space-y-5 lg:col-start-2 lg:row-start-1 xl:col-start-1">
             <section
               aria-labelledby="checkin-heading"
@@ -120,23 +120,23 @@ function Home() {
             </section>
 
             <CrewPulse />
+            <SimilarPeople />
           </div>
 
-          <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-span-2 lg:row-start-1 xl:col-start-2 xl:row-span-1">
+          <div className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-span-2 lg:row-start-1 xl:col-start-2 xl:row-span-2">
             {profile?.plan_start_date ? (
               <TodayPlan startDate={profile.plan_start_date} mood={mood} />
             ) : (
               <BuildPlanCard />
             )}
-            <Calendar />
+            <Calendar className="flex-1" />
           </div>
 
           <aside
-            aria-label="People"
-            className="min-w-0 space-y-5 lg:col-start-2 lg:row-start-2 xl:col-start-3 xl:row-start-1"
+            aria-label="Friend requests"
+            className="min-w-0 space-y-5 lg:col-start-2 lg:row-start-2 xl:col-start-1 xl:row-start-2"
           >
             <FriendRequests />
-            <SimilarPeople />
           </aside>
         </div>
 
