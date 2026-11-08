@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import AppHeader from "../../components/AppHeader";
 import { Card, ErrorNote } from "../../components/Card";
 import Calendar from "./Calendar/Calendar";
+import ConfidenceRoomCard from "./ConfidenceRoomCard";
 import CrewPulse from "./CrewPulse";
 import FriendRequests from "./FriendRequests";
 import SimilarPeople from "./SimilarPeople";
@@ -51,8 +52,8 @@ function Home() {
             Phones:      today, calendar and plan, friends
           The mood buttons wrap to fit their card, so "today" can be narrow.
         */}
-        <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] xl:items-stretch xl:grid-cols-[minmax(20rem,1fr)_minmax(0,3fr)]">
-          <div className="min-w-0 space-y-5 lg:col-start-2 lg:row-start-1 xl:col-start-1">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-stretch xl:grid-cols-[minmax(20rem,1fr)_minmax(0,3fr)]">
+          <div className="flex min-w-0 flex-col gap-5 lg:col-start-2 lg:row-start-1 xl:col-start-1">
             <section
               aria-labelledby="checkin-heading"
               className="@container rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
@@ -126,24 +127,25 @@ function Home() {
             </section>
 
             <CrewPulse />
-            <SimilarPeople />
+            <FriendRequests />
+            {/* Stretches so this column ends level with the calendar. */}
+            <SimilarPeople className="flex-1" />
           </div>
 
-          <div className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-span-2 lg:row-start-1 xl:col-start-2 xl:row-span-2">
-            {profile?.plan_start_date ? (
-              <TodayPlan startDate={profile.plan_start_date} mood={mood} />
-            ) : (
-              <BuildPlanCard />
-            )}
+          <div className="flex min-w-0 flex-col gap-5 lg:col-start-1 lg:row-start-1 xl:col-start-2">
+            {/* The plan's checklist with the Confidence Room beside it. */}
+            <div className="@container">
+              <div className="grid gap-5 @2xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                {profile?.plan_start_date ? (
+                  <TodayPlan startDate={profile.plan_start_date} mood={mood} />
+                ) : (
+                  <BuildPlanCard />
+                )}
+                <ConfidenceRoomCard />
+              </div>
+            </div>
             <Calendar className="flex-1" />
           </div>
-
-          <aside
-            aria-label="Friend requests"
-            className="min-w-0 space-y-5 lg:col-start-2 lg:row-start-2 xl:col-start-1 xl:row-start-2"
-          >
-            <FriendRequests />
-          </aside>
         </div>
 
         <SiteFooter />

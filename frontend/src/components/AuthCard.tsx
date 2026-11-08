@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router";
+import Brand from "./Brand";
 
 type AuthCardProps = {
   title: string;
@@ -21,11 +21,9 @@ function AuthCard({
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-sm">
-        <p className="mb-6 text-center text-sm font-semibold tracking-tight text-slate-500">
-          <Link to="/" className="hover:text-slate-900">
-            Layoff Landing Pad
-          </Link>
-        </p>
+        <div className="mb-6 flex justify-center">
+          <Brand />
+        </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
@@ -45,7 +43,7 @@ function AuthCard({
           <button
             type="button"
             onClick={onAction}
-            className="mt-6 w-full cursor-pointer rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
+            className="mt-6 w-full cursor-pointer rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700"
           >
             {actionLabel}
           </button>

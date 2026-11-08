@@ -104,7 +104,7 @@ function JobTracker({
             onClick={() => setFilter(value)}
             className={`cursor-pointer rounded-full border px-3 py-1 text-xs transition-colors ${
               filter === value
-                ? "border-slate-900 bg-slate-900 text-white"
+                ? "border-teal-700 bg-teal-700 text-white"
                 : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
             }`}
           >
@@ -115,8 +115,8 @@ function JobTracker({
 
       {jobs.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
-          Nothing here yet. When you find a posting on Indeed or LinkedIn, paste
-          the link into "Add a job posting" to keep track of it.
+          Nothing saved yet. Search the job sites above, then add the postings
+          you like with "Add a job posting" to keep track of them.
         </p>
       ) : shown.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">No postings match that.</p>

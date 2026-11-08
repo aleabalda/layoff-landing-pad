@@ -6,6 +6,7 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ConfidenceRoom from "./pages/ConfidenceRoom/ConfidenceRoom";
 import CrewDetail from "./pages/Crews/CrewDetail";
+import About from "./pages/About/About";
 import Crews from "./pages/Crews/Crews";
 import Home from "./pages/Home/Home";
 import Jobs from "./pages/Jobs/Jobs";
@@ -49,7 +50,7 @@ function App() {
         <button
           type="button"
           onClick={profile.reload}
-          className="cursor-pointer rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700"
+          className="cursor-pointer rounded-lg bg-teal-700 px-4 py-2 font-medium text-white hover:bg-teal-800"
         >
           Try again
         </button>
@@ -74,6 +75,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/about" element={<About />} />
       <Route
         path="/onboarding"
         element={

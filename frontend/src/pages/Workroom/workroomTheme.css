@@ -108,28 +108,128 @@
   color: #94a3b8;
 }
 
-/* The join button looks like the app's main buttons. */
+/* The join button looks like the app's main (teal) buttons. */
 [data-lk-theme="landing-pad"] .lk-prejoin .lk-join-button {
-  background-color: #0f172a;
+  background-color: #0f766e;
   color: #ffffff;
   font-weight: 500;
 }
 [data-lk-theme="landing-pad"] .lk-prejoin .lk-join-button:hover {
-  background-color: #334155;
+  background-color: #115e59;
 }
 
-/* Chat panel: a white side card with a border, not a dark overlay. */
+/*
+  Chat: looks like the app's own crew chat. Your messages are teal bubbles on
+  the right, everyone else's are slate bubbles on the left, with names and
+  times in small, quiet text.
+*/
 [data-lk-theme="landing-pad"] .lk-chat {
+  width: clamp(260px, 24rem, 100%);
   background-color: #ffffff;
   border-left: 1px solid var(--lk-border-color);
 }
-[data-lk-theme="landing-pad"] .lk-chat-entry .lk-message-body {
+[data-lk-theme="landing-pad"] .lk-chat-header {
+  justify-content: flex-start;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--lk-border-color);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+[data-lk-theme="landing-pad"] .lk-chat-header .lk-close-button {
+  right: 0.5rem;
+  transform: none;
+  border-radius: 0.5rem;
+  color: #64748b;
+}
+[data-lk-theme="landing-pad"] .lk-chat-header .lk-close-button:hover {
   background-color: #f1f5f9;
   color: #0f172a;
 }
-[data-lk-theme="landing-pad"]
-  .lk-chat-entry[data-lk-message-origin="local"]
-  .lk-message-body {
+[data-lk-theme="landing-pad"] .lk-chat-messages {
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0.5rem;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry {
+  margin: 0;
+  gap: 0.125rem;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry * {
+  margin-block: 0;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry .lk-meta-data {
+  gap: 0.5rem;
+  padding: 0 0.25rem;
+  font-size: 0.6875rem;
+  color: #94a3b8;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry .lk-meta-data .lk-participant-name {
+  margin-top: 0.5rem;
+  font-weight: 500;
+  color: #475569;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry .lk-message-body {
+  padding: 0.5rem 0.875rem;
+  border-radius: 1rem;
+  border-bottom-left-radius: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+/* Your own messages sit on the right, in teal. */
+[data-lk-theme="landing-pad"] .lk-chat-entry[data-lk-message-origin="local"] {
+  align-items: flex-end;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry[data-lk-message-origin="local"] .lk-meta-data {
+  flex-direction: row-reverse;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry[data-lk-message-origin="local"] .lk-participant-name {
+  display: none;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry[data-lk-message-origin="local"] .lk-timestamp {
+  margin-left: 0;
+}
+[data-lk-theme="landing-pad"] .lk-chat-entry[data-lk-message-origin="local"] .lk-message-body {
+  background-color: #0f766e;
+  color: #ffffff;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 0.375rem;
+}
+/* The message box and send button, like the crew chat's. */
+[data-lk-theme="landing-pad"] .lk-chat-form {
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background-color: #ffffff;
+}
+[data-lk-theme="landing-pad"] .lk-chat-form-input {
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #0f172a;
+}
+[data-lk-theme="landing-pad"] .lk-chat-form-input:focus {
+  border-color: #0d9488;
+  outline: none;
+}
+[data-lk-theme="landing-pad"] .lk-chat-form-input::placeholder {
+  color: #94a3b8;
+}
+[data-lk-theme="landing-pad"] .lk-chat-form-button {
+  border: 0;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  background-color: #0f766e;
+  color: #ffffff;
+  font-weight: 500;
+}
+[data-lk-theme="landing-pad"] .lk-chat-form-button:not(:disabled):hover {
+  background-color: #115e59;
+}
+/* Unread count on the chat button: teal, like the app's badges. */
+[data-lk-theme="landing-pad"] .lk-chat-toggle[data-lk-unread-msgs]:not([data-lk-unread-msgs="0"])::after {
   background-color: #0f766e;
   color: #ffffff;
 }

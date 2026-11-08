@@ -11,7 +11,7 @@ import {
 } from "./interviewApi";
 
 const START_BUTTON =
-  "inline-flex cursor-pointer items-center rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900";
+  "inline-flex cursor-pointer items-center rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-700";
 
 function formatDay(timestamp: string) {
   return new Date(timestamp).toLocaleDateString(undefined, {

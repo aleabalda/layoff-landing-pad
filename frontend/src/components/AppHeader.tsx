@@ -1,5 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { Link, NavLink } from "react-router";
+import { NavLink } from "react-router";
+import Brand from "./Brand";
 
 const TABS = [
   { to: "/home", label: "Today" },
@@ -19,12 +20,7 @@ function AppHeader() {
 
   return (
     <header className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-6 sm:px-6">
-      <Link
-        to="/"
-        className="text-sm font-semibold tracking-tight text-slate-500 hover:text-slate-900"
-      >
-        Layoff Landing Pad
-      </Link>
+      <Brand />
 
       <div className="flex items-center gap-1 text-sm">
         <nav aria-label="Main" className="flex gap-1">
@@ -35,7 +31,7 @@ function AppHeader() {
               className={({ isActive }) =>
                 `rounded-lg px-3 py-1.5 font-medium transition-colors ${
                   isActive
-                    ? "bg-slate-900 text-white"
+                    ? "bg-teal-50 text-teal-900"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`
               }

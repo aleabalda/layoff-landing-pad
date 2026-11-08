@@ -174,7 +174,6 @@ export function useCalendarData(from: string, to: string) {
     followUpsByDate: groupBy(followUps, (f) => f.due),
     checkinByDate: Object.fromEntries(checkins.map((c) => [c.date, c])),
     upcoming,
-    today,
     error,
     addEvent,
     removeEvent,

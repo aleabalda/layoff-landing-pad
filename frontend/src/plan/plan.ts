@@ -1,6 +1,6 @@
 import { addDays, daysBetween, localDate } from "../dates";
 import { supabase } from "../supabaseClient";
-import { DAYS_PER_WEEK, PLAN_LENGTH_DAYS, buildPlan } from "./planTemplate";
+import { DAYS_PER_WEEK, buildPlan } from "./planTemplate";
 
 // Builds the person's plan from the template and saves it, starting today.
 // Safe to call again: if they already have a plan, nothing changes. Returns
@@ -21,10 +21,6 @@ export async function createPlan(
 export function planDayNumber(startDate: string, today = localDate()) {
   // A start date a day ahead (time zones) still counts as day 1.
   return Math.max(1, daysBetween(startDate, today) + 1);
-}
-
-export function isPlanFinished(startDate: string) {
-  return planDayNumber(startDate) > PLAN_LENGTH_DAYS;
 }
 
 export function weekAndDay(dayNumber: number) {
