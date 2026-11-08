@@ -7,6 +7,7 @@ import Register from "./pages/Auth/Register";
 import CrewDetail from "./pages/Crews/CrewDetail";
 import Crews from "./pages/Crews/Crews";
 import Home from "./pages/Home/Home";
+import Jobs from "./pages/Jobs/Jobs";
 import Landing from "./pages/Landing/Landing";
 import Messages from "./pages/Messages/Messages";
 import Onboarding from "./pages/Onboarding/Onboarding";
@@ -86,6 +87,7 @@ function App() {
       />
       <Route path="/home" element={requireOnboarded(<Home />)} />
       <Route path="/plan" element={requireOnboarded(<Plan />)} />
+      <Route path="/jobs" element={requireOnboarded(<Jobs />)} />
       <Route path="/profile" element={requireOnboarded(<Profile />)} />
       <Route path="/crews" element={requireOnboarded(<Crews />)} />
       <Route path="/groups" element={<OldGroupLink />} />

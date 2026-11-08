@@ -93,13 +93,6 @@ export const TAG_GROUPS: { heading: string; tags: Option[] }[] = [
 
 export const ALL_TAGS: Option[] = TAG_GROUPS.flatMap((group) => group.tags);
 
-export const JOB_STATUSES: Option[] = [
-  { value: "applied", label: "Applied" },
-  { value: "interviewing", label: "Interviewing" },
-  { value: "offer", label: "Offer" },
-  { value: "rejected", label: "Not this time" },
-];
-
 export const BIO_MAX_LENGTH = 500;
 
 export function labelFor(options: Option[], value: string | null | undefined) {

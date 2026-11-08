@@ -179,7 +179,7 @@ function DayDetails({
               Time to follow up
             </h4>
             <Link
-              to="/profile"
+              to="/jobs"
               className="text-xs font-medium text-teal-800 underline-offset-4 hover:underline"
             >
               Update status
