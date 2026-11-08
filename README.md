@@ -8,6 +8,8 @@ Built by **CozyFleece**, two fifth-year university students.
 
 Landing Pad supports people through a hard time, but it isn't therapy.
 
+https://layoff-landing-pad-seven.vercel.app/
+
 ## Features
 
 | Area | What it does |
