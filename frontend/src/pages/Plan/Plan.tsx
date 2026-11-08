@@ -4,6 +4,7 @@ import { Card, ErrorNote } from "../../components/Card";
 import { formatDate, formatWeekdayDate } from "../../dates";
 import { useProfile } from "../../ProfileProvider";
 import BuildPlanCard from "../../plan/BuildPlanCard";
+import PersonalizePlanCard from "../../plan/PersonalizePlanCard";
 import PlanTaskList from "../../plan/PlanTaskList";
 import { dateForPlanDay, planDayNumber, weekAndDay } from "../../plan/plan";
 import {
@@ -19,12 +20,12 @@ function Plan() {
   return (
     <div className="min-h-screen bg-slate-50">
       <AppHeader />
-      <main className="mx-auto max-w-2xl space-y-5 px-4 pb-12">
+      <main className="mx-auto max-w-6xl space-y-5 px-4 pb-12 sm:px-6">
         <div className="pt-4 pb-3">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
             Your 30-day plan
           </h1>
-          <p className="mt-2 text-slate-600">
+          <p className="mt-2 max-w-2xl text-slate-600">
             Each week opens when it starts, so you won't feel buried on day one.
             Skipped a day? That's fine. Nothing here expires.
           </p>
@@ -52,85 +53,111 @@ function PlanWeeks({ startDate }: { startDate: string }) {
   const totalCount = tasks?.length ?? 0;
   const week = PLAN_WEEKS[selectedWeek - 1];
 
+  const weekTasks = (number: number) =>
+    tasks?.filter((task) => task.week === number) ?? [];
+
   return (
-    <>
-      <Card labelledBy="plan-progress-heading">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2
-            id="plan-progress-heading"
-            className="font-semibold tracking-tight text-slate-900"
-          >
-            {today ? `Day ${dayNumber} of ${PLAN_LENGTH_DAYS}` : "Plan complete"}
-          </h2>
-          {tasks && (
-            <p className="text-sm text-slate-600 tabular-nums">
-              {doneCount} of {totalCount} done
-            </p>
-          )}
-        </div>
-        <div
-          className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"
-          role="progressbar"
-          aria-label="Tasks done"
-          aria-valuemin={0}
-          aria-valuemax={totalCount}
-          aria-valuenow={doneCount}
-        >
+    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      {/* Left: overview and personalization. On wide screens it stays in view
+          while the days scroll. If it's taller than the screen (say, with the
+          personalization form open), it scrolls on its own. The padding and
+          negative margin keep card shadows and focus rings from being clipped. */}
+      <div className="space-y-5 lg:sticky lg:top-4 lg:-m-1 lg:max-h-[calc(100dvh-2rem)] lg:overflow-y-auto lg:overscroll-contain lg:p-1">
+        <Card labelledBy="plan-progress-heading">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2
+              id="plan-progress-heading"
+              className="font-semibold tracking-tight text-slate-900"
+            >
+              {today ? `Day ${dayNumber} of ${PLAN_LENGTH_DAYS}` : "Plan complete"}
+            </h2>
+            {tasks && (
+              <p className="text-sm text-slate-600 tabular-nums">
+                {doneCount} of {totalCount} done
+              </p>
+            )}
+          </div>
           <div
-            className="h-full rounded-full bg-teal-600 transition-[width]"
-            style={{
-              width: totalCount ? `${(doneCount / totalCount) * 100}%` : 0,
-            }}
+            className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100"
+            role="progressbar"
+            aria-label="Tasks done"
+            aria-valuemin={0}
+            aria-valuemax={totalCount}
+            aria-valuenow={doneCount}
+          >
+            <div
+              className="h-full rounded-full bg-teal-600 transition-[width]"
+              style={{
+                width: totalCount ? `${(doneCount / totalCount) * 100}%` : 0,
+              }}
+            />
+          </div>
+
+          <h3 className="mt-6 text-sm font-medium text-slate-900">Weeks</h3>
+          <ol className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            {PLAN_WEEKS.map(({ week: number, theme }) => {
+              const isOpen = number <= openWeeks;
+              const isSelected = number === selectedWeek;
+              const isCurrent = today?.week === number;
+              const inWeek = weekTasks(number);
+              const doneInWeek = inWeek.filter((task) => task.done).length;
+              return (
+                <li key={number}>
+                  <button
+                    type="button"
+                    aria-pressed={isSelected}
+                    disabled={!isOpen}
+                    onClick={() => setSelectedWeek(number)}
+                    className={`flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed ${
+                      isSelected
+                        ? "border-teal-600 bg-teal-50"
+                        : isOpen
+                          ? "border-slate-200 hover:bg-slate-50"
+                          : "border-dashed border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-xs text-slate-500">
+                        Week {number}
+                        {isCurrent && (
+                          <span className="font-medium text-teal-800"> · Now</span>
+                        )}
+                      </span>
+                      <span
+                        className={`block text-sm font-medium ${
+                          isOpen ? "text-slate-900" : "text-slate-400"
+                        }`}
+                      >
+                        {theme}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right text-xs text-slate-500 tabular-nums">
+                      {isOpen
+                        ? tasks && `${doneInWeek}/${inWeek.length} done`
+                        : `Opens ${formatDate(dateForPlanDay(startDate, number, 1))}`}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </Card>
+
+        {!isFinished && tasks && (
+          <PersonalizePlanCard
+            week={today?.week ?? PLAN_WEEKS.length}
+            hasPersonalizedTasks={tasks.some(
+              (task) => task.week === today?.week && task.personalized_at,
+            )}
           />
-        </div>
+        )}
+      </div>
 
-        <div
-          className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4"
-          aria-label="Weeks"
-        >
-          {PLAN_WEEKS.map(({ week: number, theme }) => {
-            const isOpen = number <= openWeeks;
-            const isSelected = number === selectedWeek;
-            return (
-              <button
-                key={number}
-                type="button"
-                aria-pressed={isSelected}
-                disabled={!isOpen}
-                onClick={() => setSelectedWeek(number)}
-                className={`cursor-pointer rounded-xl border px-3 py-2 text-left transition-colors disabled:cursor-not-allowed ${
-                  isSelected
-                    ? "border-teal-600 bg-teal-50"
-                    : isOpen
-                      ? "border-slate-200 hover:bg-slate-50"
-                      : "border-dashed border-slate-200 bg-slate-50"
-                }`}
-              >
-                <span className="block text-xs text-slate-500">
-                  Week {number}
-                </span>
-                <span
-                  className={`block text-sm font-medium ${
-                    isOpen ? "text-slate-900" : "text-slate-400"
-                  }`}
-                >
-                  {theme}
-                </span>
-                {!isOpen && (
-                  <span className="block text-[11px] text-slate-500">
-                    Opens {formatDate(dateForPlanDay(startDate, number, 1))}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </Card>
-
+      {/* Right: the selected week's days */}
       <Card labelledBy="week-heading">
         <h2
           id="week-heading"
-          className="font-semibold tracking-tight text-slate-900"
+          className="text-lg font-semibold tracking-tight text-slate-900"
         >
           Week {week.week}: {week.theme}
         </h2>
@@ -143,7 +170,7 @@ function PlanWeeks({ startDate }: { startDate: string }) {
         )}
 
         {tasks && (
-          <ol className="mt-5 space-y-5">
+          <ol className="mt-5 space-y-4">
             {Array.from({ length: DAYS_PER_WEEK }, (_, index) => index + 1).map(
               (day) => (
                 <PlanDay
@@ -161,7 +188,7 @@ function PlanWeeks({ startDate }: { startDate: string }) {
           </ol>
         )}
       </Card>
-    </>
+    </div>
   );
 }
 

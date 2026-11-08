@@ -12,13 +12,19 @@ export type PlanTask = {
   title: string;
   link_url: string | null;
   done: boolean;
+  personalized_at: string | null;
 };
 
 // Fired after a task is ticked or unticked, so other views (the calendar) can
 // refresh.
 export const PLAN_TASKS_CHANGED = "plan-tasks-changed";
 
-const COLUMNS = "id, week, day, category, energy_level, title, link_url, done";
+// Fired when task wording changes (personalized or restored), so every list
+// of tasks loads them again.
+export const PLAN_TASKS_REPLACED = "plan-tasks-replaced";
+
+const COLUMNS =
+  "id, week, day, category, energy_level, title, link_url, done, personalized_at";
 
 // Loads the signed-in person's plan tasks: one day's, or the whole plan.
 export function usePlanTasks(only?: { week: number; day: number }) {
@@ -26,6 +32,13 @@ export function usePlanTasks(only?: { week: number; day: number }) {
   const [error, setError] = useState<string | null>(null);
   const week = only?.week;
   const day = only?.day;
+
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const refresh = () => setVersion((v) => v + 1);
+    window.addEventListener(PLAN_TASKS_REPLACED, refresh);
+    return () => window.removeEventListener(PLAN_TASKS_REPLACED, refresh);
+  }, []);
 
   useEffect(() => {
     let isCurrent = true;
@@ -48,7 +61,7 @@ export function usePlanTasks(only?: { week: number; day: number }) {
     return () => {
       isCurrent = false;
     };
-  }, [week, day]);
+  }, [week, day, version]);
 
   const setDone = (id: string, done: boolean) =>
     setTasks(

@@ -5,3 +5,8 @@
     scroll-behavior: smooth;
   }
 }
+
+/* Keeps the page behind an open modal from scrolling. */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
