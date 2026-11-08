@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { localDate } from "../dates";
 import type { Option } from "../profileOptions";
-import { getAuthToken, supabase } from "../supabaseClient";
+import { postApi } from "../apiClient";
+import { supabase } from "../supabaseClient";
 import { PLAN_TASKS_CHANGED, PLAN_TASKS_REPLACED } from "./usePlanTasks";
 
 // Must match frontend/api/personalize-plan.ts.
@@ -51,33 +52,10 @@ function announceNewTasks() {
 
 // Asks our API (which calls Gemini on the server) to rewrite this week's tasks.
 export async function personalizePlan(answers: PersonalizeAnswers) {
-  const token = await getAuthToken();
-  if (!token) throw new Error("Please log in again.");
-
-  let response: Response;
-  try {
-    response = await fetch("/api/personalize-plan", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ answers, today: localDate() }),
-    });
-  } catch {
-    throw new Error("Couldn't reach the server. Check your connection and try again.");
-  }
-
-  const body = (await response.json().catch(() => ({}))) as {
-    summary?: string;
-    updated?: number;
-    week?: number;
-    error?: string;
-  };
-  if (!response.ok) {
-    throw new Error(body.error ?? "Something went wrong. Please try again.");
-  }
-
+  const body = await postApi<{ summary?: string; updated?: number }>(
+    "/api/personalize-plan",
+    { answers, today: localDate() },
+  );
   announceNewTasks();
   return { summary: body.summary ?? "", updated: body.updated ?? 0 };
 }

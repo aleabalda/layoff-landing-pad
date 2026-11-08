@@ -89,8 +89,6 @@ export function buildPrompt(
         has_link: !!task.link_url,
       })),
     },
-    null,
-    2,
   );
 }
 

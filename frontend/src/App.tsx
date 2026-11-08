@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useParams } from "react-router";
 import { useProfile } from "./ProfileProvider";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import ConfidenceRoom from "./pages/ConfidenceRoom/ConfidenceRoom";
 import CrewDetail from "./pages/Crews/CrewDetail";
 import Crews from "./pages/Crews/Crews";
 import Home from "./pages/Home/Home";
@@ -87,6 +88,14 @@ function App() {
       />
       <Route path="/home" element={requireOnboarded(<Home />)} />
       <Route path="/plan" element={requireOnboarded(<Plan />)} />
+      <Route
+        path="/confidence-room"
+        element={requireOnboarded(<ConfidenceRoom />)}
+      />
+      <Route
+        path="/confidence-room/:sessionId"
+        element={requireOnboarded(<ConfidenceRoom />)}
+      />
       <Route path="/jobs" element={requireOnboarded(<Jobs />)} />
       <Route path="/profile" element={requireOnboarded(<Profile />)} />
       <Route path="/crews" element={requireOnboarded(<Crews />)} />
