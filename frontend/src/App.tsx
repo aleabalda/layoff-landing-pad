@@ -6,6 +6,7 @@ import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import ConfidenceRoom from "./pages/ConfidenceRoom/ConfidenceRoom";
 import CrewDetail from "./pages/Crews/CrewDetail";
+import About from "./pages/About/About";
 import Crews from "./pages/Crews/Crews";
 import Home from "./pages/Home/Home";
 import Jobs from "./pages/Jobs/Jobs";
@@ -74,6 +75,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/about" element={<About />} />
       <Route
         path="/onboarding"
         element={

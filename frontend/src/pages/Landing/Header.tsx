@@ -16,17 +16,23 @@ function Header() {
           className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm"
         >
           <a
-            href="#how-it-works"
+            href="/#how-it-works"
             className="text-slate-600 hover:text-slate-900 text-xs"
           >
             How it works
           </a>
           <a
-            href="#safety"
+            href="/#safety"
             className="text-slate-600 hover:text-slate-900 text-xs"
           >
             Our safety approach
           </a>
+          <Link
+            to="/about"
+            className="text-slate-600 hover:text-slate-900 text-xs"
+          >
+            About us
+          </Link>
         </nav>
       </div>
 
