@@ -15,7 +15,9 @@ function Tooltip({ value, label }: { value: string; label: string }) {
       role="tooltip"
       className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs whitespace-nowrap text-slate-300 shadow-lg group-hover:block group-focus-visible:block"
     >
-      <strong className="block text-sm font-semibold text-white">{value}</strong>
+      <strong className="block text-sm font-semibold text-white">
+        {value}
+      </strong>
       {label}
     </span>
   );

@@ -12,7 +12,7 @@ export const JOB_END_REASONS: Option[] = [
 
 export const INITIAL_FEELINGS: Option[] = [
   { value: "overwhelmed", label: "Overwhelmed" },
-  {value: "sad", label: "Sad" },
+  { value: "sad", label: "Sad" },
   { value: "anxious", label: "Anxious" },
   { value: "confused", label: "Confused" },
   { value: "okay", label: "Okay" },

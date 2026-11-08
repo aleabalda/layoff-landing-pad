@@ -86,8 +86,8 @@ function WinsProgress() {
 
           {wins.length === 0 ? (
             <p className="mt-5 text-sm text-slate-500">
-              Nothing yet. Your first win is waiting on the Today page, and
-              rest counts too.
+              Nothing yet. Your first win is waiting on the Today page, and rest
+              counts too.
             </p>
           ) : (
             <>

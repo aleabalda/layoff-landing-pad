@@ -14,6 +14,10 @@ export type PlanTask = {
   done: boolean;
 };
 
+// Fired after a task is ticked or unticked, so other views (the calendar) can
+// refresh.
+export const PLAN_TASKS_CHANGED = "plan-tasks-changed";
+
 const COLUMNS = "id, week, day, category, energy_level, title, link_url, done";
 
 // Loads the signed-in person's plan tasks: one day's, or the whole plan.
@@ -67,6 +71,8 @@ export function usePlanTasks(only?: { week: number; day: number }) {
     if (error) {
       setError("Couldn't save that. Please try again.");
       setDone(task.id, task.done);
+    } else {
+      window.dispatchEvent(new Event(PLAN_TASKS_CHANGED));
     }
   };
 

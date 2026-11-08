@@ -19,13 +19,15 @@ export type Profile = {
   field: string | null;
   experience_level: string | null;
   tags: string[];
+  discoverable: boolean;
+  share_pulse: boolean;
   onboarded_at: string | null;
   plan_start_date: string | null;
   created_at: string;
 };
 
 const PROFILE_COLUMNS =
-  "display_name, city, bio, job_end_reason, initial_feeling, urgent_need, field, experience_level, tags, onboarded_at, plan_start_date, created_at";
+  "display_name, city, bio, job_end_reason, initial_feeling, urgent_need, field, experience_level, tags, discoverable, share_pulse, onboarded_at, plan_start_date, created_at";
 
 type ProfileState = {
   profile: Profile | null;
@@ -103,6 +105,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
 export function useProfile() {
   const context = useContext(ProfileContext);
-  if (!context) throw new Error("useProfile must be used inside ProfileProvider");
+  if (!context)
+    throw new Error("useProfile must be used inside ProfileProvider");
   return context;
 }
