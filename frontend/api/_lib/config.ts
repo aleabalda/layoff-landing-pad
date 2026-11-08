@@ -8,7 +8,9 @@
 
 import { HttpError } from "./helpers.js";
 
-export const DEFAULT_MODEL = "gemini-3.8-flash";
+// gemini-3.8-flash is newer but often overloaded (503s and long hangs), while
+// 3.6 answers in a second or two. See FALLBACK_MODELS in gemini.ts too.
+export const DEFAULT_MODEL = "gemini-3.6-flash";
 
 // Stays under the 60-second limit set for this function in vercel.json.
 export const GEMINI_TIMEOUT_MS = 55_000;
