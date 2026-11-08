@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { Link } from "react-router";
 import AppHeader from "../../components/AppHeader";
-import { localDate } from "../../dates";
-import { supabase } from "../../supabaseClient";
+import { Card, ErrorNote } from "../../components/Card";
 import { useProfile } from "../../ProfileProvider";
+import BuildPlanCard from "../../plan/BuildPlanCard";
+import PlanTaskList from "../../plan/PlanTaskList";
+import { planDayNumber, weekAndDay } from "../../plan/plan";
+import { PLAN_LENGTH_DAYS, PLAN_WEEKS } from "../../plan/planTemplate";
+import { usePlanTasks } from "../../plan/usePlanTasks";
 
 const MOODS = [
   { value: 1, emoji: "😣", label: "Overwhelmed" },
@@ -12,73 +17,20 @@ const MOODS = [
   { value: 5, emoji: "😊", label: "Hopeful" },
 ];
 
-// Tasks are sized to how the person is feeling today.
-const LOW_ENERGY_TASKS = [
-  "Take a 15-minute walk",
-  "Update your LinkedIn headline",
-  "Reply in your crew chat",
-];
-
-const HIGH_ENERGY_TASKS = [
-  "Apply to 2 roles",
-  "Practise your story out loud",
-  "Ask a former colleague for a reference",
-];
-
 // Demo data until crews are backed by a database.
 const CREW_PULSE = [
   "3 of your crew checked in today.",
   "Marcus got an interview!",
 ];
 
+const LINK_CLASSES =
+  "shrink-0 text-sm font-medium text-teal-800 underline-offset-4 hover:underline";
+
 function Home() {
   const { profile } = useProfile();
   const [mood, setMood] = useState<number | null>(null);
   const [note, setNote] = useState("");
-  const [doneTasks, setDoneTasks] = useState<string[]>([]);
-
-  const [winsError, setWinsError] = useState<string | null>(null);
   const name = profile?.display_name;
-  const tasks = mood && mood >= 4 ? HIGH_ENERGY_TASKS : LOW_ENERGY_TASKS;
-  const today = localDate();
-
-  // Ticked tasks are saved as wins, which the Profile page adds up.
-  useEffect(() => {
-    let isCurrent = true;
-
-    supabase
-      .from("wins")
-      .select("title")
-      .eq("date", today)
-      .then(({ data, error }) => {
-        if (!isCurrent) return;
-        if (error) setWinsError(error.message);
-        else setDoneTasks(data.map((win) => win.title));
-      });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [today]);
-
-  const toggleTask = async (task: string) => {
-    const wasDone = doneTasks.includes(task);
-    setWinsError(null);
-    setDoneTasks((done) =>
-      wasDone ? done.filter((t) => t !== task) : [...done, task],
-    );
-
-    const { error } = wasDone
-      ? await supabase.from("wins").delete().eq("date", today).eq("title", task)
-      : await supabase.from("wins").insert({ date: today, title: task });
-
-    if (error) {
-      setWinsError("Couldn't save that. Please try again.");
-      setDoneTasks((done) =>
-        wasDone ? [...done, task] : done.filter((t) => t !== task),
-      );
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -155,50 +107,11 @@ function Home() {
           )}
         </section>
 
-        <section
-          aria-labelledby="wins-heading"
-          className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-        >
-          <h2
-            id="wins-heading"
-            className="font-semibold tracking-tight text-slate-900"
-          >
-            Today's 3 small wins
-          </h2>
-          <p className="mt-1 text-sm text-slate-600">
-            Do what you can. Rest counts as progress too.
-          </p>
-
-          <ul className="mt-4 space-y-1">
-            {tasks.map((task) => {
-              const done = doneTasks.includes(task);
-              return (
-                <li key={task}>
-                  <label className="flex cursor-pointer items-center gap-3 rounded-lg py-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={done}
-                      onChange={() => toggleTask(task)}
-                      className="size-4 accent-teal-700"
-                    />
-                    <span
-                      className={
-                        done ? "text-slate-400 line-through" : "text-slate-800"
-                      }
-                    >
-                      {task}
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
-          {winsError && (
-            <p role="alert" className="mt-3 text-sm text-red-700">
-              {winsError}
-            </p>
-          )}
-        </section>
+        {profile?.plan_start_date ? (
+          <TodayPlan startDate={profile.plan_start_date} mood={mood} />
+        ) : (
+          <BuildPlanCard />
+        )}
 
         <section
           aria-labelledby="crew-heading"
@@ -238,6 +151,97 @@ function Home() {
         </footer>
       </main>
     </div>
+  );
+}
+
+function TodayPlan({
+  startDate,
+  mood,
+}: {
+  startDate: string;
+  mood: number | null;
+}) {
+  const dayNumber = planDayNumber(startDate);
+
+  if (dayNumber > PLAN_LENGTH_DAYS) {
+    return (
+      <Card labelledBy="today-heading">
+        <h2
+          id="today-heading"
+          className="font-semibold tracking-tight text-slate-900"
+        >
+          You finished your 30-day plan
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          That's a whole month of showing up for yourself. Anything you didn't
+          get to is still on your plan, with no deadline.
+        </p>
+        <Link to="/plan" className={`mt-4 inline-block ${LINK_CLASSES}`}>
+          Look back at your plan
+        </Link>
+      </Card>
+    );
+  }
+
+  return <TodayTasks dayNumber={dayNumber} mood={mood} />;
+}
+
+function TodayTasks({
+  dayNumber,
+  mood,
+}: {
+  dayNumber: number;
+  mood: number | null;
+}) {
+  const { week, day } = weekAndDay(dayNumber);
+  const { tasks, error, toggle } = usePlanTasks({ week, day });
+  const isHardDay = mood !== null && mood <= 2;
+
+  // On a hard day, the gentle tasks go first. sort() keeps the rest in order.
+  const shown =
+    tasks && isHardDay
+      ? [...tasks].sort(
+          (a, b) =>
+            Number(b.energy_level === "low") - Number(a.energy_level === "low"),
+        )
+      : tasks;
+
+  return (
+    <Card labelledBy="today-heading">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-medium text-teal-800">
+            Day {dayNumber} of {PLAN_LENGTH_DAYS} · Week {week}:{" "}
+            {PLAN_WEEKS[week - 1].theme}
+          </p>
+          <h2
+            id="today-heading"
+            className="mt-1 font-semibold tracking-tight text-slate-900"
+          >
+            Today's small wins
+          </h2>
+        </div>
+        <Link to="/plan" className={LINK_CLASSES}>
+          Full plan
+        </Link>
+      </div>
+      <p className="mt-1 text-sm text-slate-600">
+        {isHardDay
+          ? "Running low today? The gentle ones are plenty, and even one counts."
+          : "Do what you can. Rest counts as progress too."}
+      </p>
+
+      <ErrorNote message={error} />
+
+      {tasks === null && !error && (
+        <p className="mt-4 text-sm text-slate-500">Loading...</p>
+      )}
+      {shown && (
+        <div className="mt-3">
+          <PlanTaskList tasks={shown} onToggle={toggle} />
+        </div>
+      )}
+    </Card>
   );
 }
 

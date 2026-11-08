@@ -7,6 +7,7 @@ import Register from "./pages/Auth/Register";
 import Home from "./pages/Home/Home";
 import Landing from "./pages/Landing/Landing";
 import Onboarding from "./pages/Onboarding/Onboarding";
+import Plan from "./pages/Plan/Plan";
 import Profile from "./pages/Profile/Profile";
 
 function CenteredMessage({ children }: { children: ReactNode }) {
@@ -72,6 +73,7 @@ function App() {
         }
       />
       <Route path="/home" element={requireOnboarded(<Home />)} />
+      <Route path="/plan" element={requireOnboarded(<Plan />)} />
       <Route path="/profile" element={requireOnboarded(<Profile />)} />
       <Route
         path="/login"
