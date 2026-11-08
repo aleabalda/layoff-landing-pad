@@ -13,6 +13,19 @@ import {
   type Option,
   URGENT_NEEDS,
 } from "../../profileOptions";
+import {
+  LinkInputs,
+  ResumePicker,
+} from "../../components/ResumeAndLinksFields";
+import {
+  formatBytes,
+  type LinkKind,
+  type Links,
+  NO_LINKS,
+  saveLinks,
+  uploadResume,
+  validateLinks,
+} from "../../resume";
 import { supabase } from "../../supabaseClient";
 import TagPicker, { toggleInList } from "../../components/TagPicker";
 
@@ -21,13 +34,16 @@ const STEPS = [
   "What happened",
   "Your work",
   "Your tags",
+  "Resume",
   "Your plan",
 ];
 
-// Finishing the tags step saves the answers. The plan step after it is
-// optional: skipping leaves a "Build my plan" button on Home and Plan.
+// Finishing the tags step saves the answers. The steps after it are optional:
+// the resume and links step saves whatever was filled in, and skipping the plan
+// leaves a "Build my plan" button on Home and Plan.
 const TAGS_STEP = 3;
-const PLAN_STEP = 4;
+const LINKS_STEP = 4;
+const PLAN_STEP = 5;
 
 type Answers = {
   displayName: string;
@@ -62,6 +78,11 @@ function Onboarding() {
     experienceLevel: null,
     tags: [],
   });
+  const [links, setLinks] = useState<Links>(NO_LINKS);
+  const [linkErrors, setLinkErrors] = useState<Partial<Links>>({});
+  const [resume, setResume] = useState<File | null>(null);
+  // So going back and forward doesn't upload the same file twice.
+  const [uploadedResume, setUploadedResume] = useState<File | null>(null);
 
   const set = <K extends keyof Answers>(key: K, value: Answers[K]) =>
     setAnswers((current) => ({ ...current, [key]: value }));
@@ -74,7 +95,8 @@ function Onboarding() {
     !!answers.jobEndReason && !!answers.initialFeeling && !!answers.urgentNeed,
     !!answers.field && !!answers.experienceLevel,
     true, // Tags are optional.
-    true, // So is the plan.
+    true, // So are the resume and links.
+    true, // And the plan.
   ][step];
 
   // Saves the answers and marks onboarding done in the database. The app keeps
@@ -98,6 +120,47 @@ function Onboarding() {
     return error?.message ?? null;
   };
 
+  const setLink = (kind: LinkKind, value: string) => {
+    setLinks((current) => ({ ...current, [kind]: value }));
+    setLinkErrors((current) => ({ ...current, [kind]: undefined }));
+  };
+
+  const hasLinksOrResume =
+    !!resume || Object.values(links).some((value) => value.trim() !== "");
+
+  // Saves the links (blank ones are cleared) and uploads the resume if there's
+  // a new one. Returns an error message, or null if it all saved.
+  const saveLinksAndResume = async () => {
+    const { urls, errors } = validateLinks(links);
+    setLinkErrors(errors);
+    if (Object.keys(errors).length) return "Please check the highlighted links.";
+    if (!user?.sub) return "Not signed in";
+
+    try {
+      await saveLinks(user.sub, urls);
+    } catch (err) {
+      return err instanceof Error ? err.message : String(err);
+    }
+
+    // Show the tidied-up links if they come back to this step.
+    setLinks({
+      linkedin: urls.linkedin ?? "",
+      github: urls.github ?? "",
+      website: urls.website ?? "",
+    });
+
+    if (resume && resume !== uploadedResume) {
+      try {
+        await uploadResume(user.sub, resume);
+        setUploadedResume(resume);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return `Your links are saved, but we couldn't upload your resume: ${message}`;
+      }
+    }
+    return null;
+  };
+
   // Loading the now-onboarded profile is what lets the app leave onboarding.
   const finish = async () => {
     setBusy("finishing");
@@ -119,6 +182,15 @@ function Onboarding() {
     if (step === TAGS_STEP) {
       setBusy("saving");
       const saveError = await saveAnswers();
+      setBusy(null);
+      if (saveError) setError(saveError);
+      else setStep(LINKS_STEP);
+      return;
+    }
+
+    if (step === LINKS_STEP) {
+      setBusy("saving");
+      const saveError = await saveLinksAndResume();
       setBusy(null);
       if (saveError) setError(saveError);
       else setStep(PLAN_STEP);
@@ -147,7 +219,13 @@ function Onboarding() {
           : answers.tags.length
             ? "Continue"
             : "Skip tags"
-        : busy === "building"
+        : step === LINKS_STEP
+          ? busy === "saving"
+            ? "Saving..."
+            : hasLinksOrResume
+              ? "Continue"
+              : "Skip"
+          : busy === "building"
           ? "Building your plan..."
           : "Build my plan";
 
@@ -169,7 +247,7 @@ function Onboarding() {
           </button>
         </div>
 
-        <ol className="mb-6 grid grid-cols-5 gap-2" aria-label="Progress">
+        <ol className="mb-6 grid grid-cols-6 gap-2" aria-label="Progress">
           {STEPS.map((label, index) => (
             <li key={label}>
               <div
@@ -277,6 +355,25 @@ function Onboarding() {
                 subtitle="We use these to match you with people in a similar spot. Choose as many as you like, or skip this."
               />
               <TagPicker selected={answers.tags} onToggle={toggleTag} />
+            </>
+          )}
+
+          {step === LINKS_STEP && (
+            <>
+              <StepHeading
+                title="Your resume and links"
+                subtitle="Add whatever you have handy. It all stays private to you, and you can skip this."
+              />
+
+              <div className="mt-6">
+                <ResumePicker
+                  fileName={resume?.name ?? null}
+                  fileDetail={resume ? formatBytes(resume.size) : undefined}
+                  onChoose={setResume}
+                  onClear={() => setResume(null)}
+                />
+              </div>
+              <LinkInputs links={links} errors={linkErrors} onChange={setLink} />
             </>
           )}
 
