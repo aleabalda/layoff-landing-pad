@@ -1,19 +1,33 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { type FormEvent, useState } from "react";
 import { useNavigate } from "react-router";
+import { createPlan } from "../../plan/plan";
+import { buildPlan, PLAN_WEEKS } from "../../plan/planTemplate";
 import { useProfile } from "../../ProfileProvider";
 import {
   EXPERIENCE_LEVELS,
   FIELDS,
   INITIAL_FEELINGS,
   JOB_END_REASONS,
+  labelFor,
   type Option,
   URGENT_NEEDS,
 } from "../../profileOptions";
 import { supabase } from "../../supabaseClient";
 import TagPicker, { toggleInList } from "../../components/TagPicker";
 
-const STEPS = ["About you", "What happened", "Your work", "Your tags"];
+const STEPS = [
+  "About you",
+  "What happened",
+  "Your work",
+  "Your tags",
+  "Your plan",
+];
+
+// Finishing the tags step saves the answers. The plan step after it is
+// optional: skipping leaves a "Build my plan" button on Home and Plan.
+const TAGS_STEP = 3;
+const PLAN_STEP = 4;
 
 type Answers = {
   displayName: string;
@@ -26,13 +40,15 @@ type Answers = {
   tags: string[];
 };
 
+type Busy = "saving" | "building" | "finishing" | null;
+
 function Onboarding() {
   const { user, logout } = useAuth0();
   const { reload } = useProfile();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
+  const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Answers>({
     // given_name only comes from social logins. Email sign-ups start blank
@@ -50,28 +66,24 @@ function Onboarding() {
   const set = <K extends keyof Answers>(key: K, value: Answers[K]) =>
     setAnswers((current) => ({ ...current, [key]: value }));
 
-  const toggleTag = (tag: string) => set("tags", toggleInList(answers.tags, tag));
+  const toggleTag = (tag: string) =>
+    set("tags", toggleInList(answers.tags, tag));
 
   const stepIsComplete = [
     answers.displayName.trim() !== "",
     !!answers.jobEndReason && !!answers.initialFeeling && !!answers.urgentNeed,
     !!answers.field && !!answers.experienceLevel,
     true, // Tags are optional.
+    true, // So is the plan.
   ][step];
 
-  const isLastStep = step === STEPS.length - 1;
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!stepIsComplete) return;
-
-    if (!isLastStep) {
-      setStep(step + 1);
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
+  // Saves the answers and marks onboarding done in the database. The app keeps
+  // showing this page until finish() reloads the profile.
+  const saveAnswers = async () => {
+    // Make sure the account row exists before saving into it, in case it was
+    // removed after the app loaded.
+    const ensured = await supabase.rpc("ensure_user");
+    if (ensured.error) return ensured.error.message;
 
     const { error } = await supabase.rpc("save_profile", {
       new_display_name: answers.displayName,
@@ -83,16 +95,61 @@ function Onboarding() {
       new_experience_level: answers.experienceLevel,
       new_tags: answers.tags,
     });
+    return error?.message ?? null;
+  };
 
-    if (error) {
-      setError(error.message);
-      setIsSaving(false);
-      return;
-    }
-
+  // Loading the now-onboarded profile is what lets the app leave onboarding.
+  const finish = async () => {
+    setBusy("finishing");
+    setError(null);
     await reload();
     navigate("/home", { replace: true });
   };
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!stepIsComplete || busy) return;
+    setError(null);
+
+    if (step < TAGS_STEP) {
+      setStep(step + 1);
+      return;
+    }
+
+    if (step === TAGS_STEP) {
+      setBusy("saving");
+      const saveError = await saveAnswers();
+      setBusy(null);
+      if (saveError) setError(saveError);
+      else setStep(PLAN_STEP);
+      return;
+    }
+
+    setBusy("building");
+    try {
+      await createPlan(answers.jobEndReason, answers.urgentNeed);
+    } catch (err) {
+      setError(
+        `We couldn't build your plan: ${err instanceof Error ? err.message : String(err)}. You can try again, or skip for now.`,
+      );
+      setBusy(null);
+      return;
+    }
+    await finish();
+  };
+
+  const submitLabel =
+    step < TAGS_STEP
+      ? "Continue"
+      : step === TAGS_STEP
+        ? busy === "saving"
+          ? "Saving..."
+          : answers.tags.length
+            ? "Continue"
+            : "Skip tags"
+        : busy === "building"
+          ? "Building your plan..."
+          : "Build my plan";
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
@@ -112,7 +169,7 @@ function Onboarding() {
           </button>
         </div>
 
-        <ol className="mb-6 grid grid-cols-4 gap-2" aria-label="Progress">
+        <ol className="mb-6 grid grid-cols-5 gap-2" aria-label="Progress">
           {STEPS.map((label, index) => (
             <li key={label}>
               <div
@@ -122,7 +179,9 @@ function Onboarding() {
               />
               <span
                 className={`mt-2 block text-xs ${
-                  index === step ? "font-medium text-slate-900" : "text-slate-500"
+                  index === step
+                    ? "font-medium text-slate-900"
+                    : "text-slate-500"
                 }`}
                 aria-current={index === step ? "step" : undefined}
               >
@@ -211,7 +270,7 @@ function Onboarding() {
             </>
           )}
 
-          {step === 3 && (
+          {step === TAGS_STEP && (
             <>
               <StepHeading
                 title="Pick anything that fits"
@@ -219,6 +278,13 @@ function Onboarding() {
               />
               <TagPicker selected={answers.tags} onToggle={toggleTag} />
             </>
+          )}
+
+          {step === PLAN_STEP && (
+            <PlanStep
+              jobEndReason={answers.jobEndReason}
+              urgentNeed={answers.urgentNeed}
+            />
           )}
 
           {error && (
@@ -234,31 +300,104 @@ function Onboarding() {
             {step > 0 ? (
               <button
                 type="button"
-                onClick={() => setStep(step - 1)}
-                className="cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900"
+                onClick={() => {
+                  setError(null);
+                  setStep(step - 1);
+                }}
+                disabled={!!busy}
+                className="cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300"
               >
                 Back
               </button>
             ) : (
               <span />
             )}
-            <button
-              type="submit"
-              disabled={!stepIsComplete || isSaving}
-              className="cursor-pointer rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-              {isSaving
-                ? "Saving..."
-                : isLastStep
-                  ? answers.tags.length
-                    ? "Finish"
-                    : "Skip and finish"
-                  : "Continue"}
-            </button>
+            <div className="flex items-center gap-2">
+              {step === PLAN_STEP && (
+                <button
+                  type="button"
+                  onClick={finish}
+                  disabled={!!busy}
+                  className="cursor-pointer rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:cursor-not-allowed disabled:text-slate-300"
+                >
+                  {busy === "finishing" ? "One moment..." : "Skip for now"}
+                </button>
+              )}
+              <button
+                type="submit"
+                disabled={!stepIsComplete || !!busy}
+                className="cursor-pointer rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {submitLabel}
+              </button>
+            </div>
           </div>
         </form>
       </div>
     </main>
+  );
+}
+
+// Shows what building a plan means before they commit to it.
+function PlanStep({
+  jobEndReason,
+  urgentNeed,
+}: {
+  jobEndReason: string | null;
+  urgentNeed: string | null;
+}) {
+  const firstDay = buildPlan(jobEndReason, urgentNeed).filter(
+    (task) => task.week === 1 && task.day === 1,
+  );
+  const shapedBy = [
+    labelFor(JOB_END_REASONS, jobEndReason),
+    labelFor(URGENT_NEEDS, urgentNeed),
+  ].filter(Boolean);
+
+  return (
+    <>
+      <StepHeading
+        title="Want a 30-day plan?"
+        subtitle="We'll lay out a few small tasks for each day over four weeks, starting today. Each week opens when it starts, so you won't feel buried."
+      />
+
+      {shapedBy.length > 0 && (
+        <p className="mt-4 text-sm text-slate-600">
+          <span className="font-medium text-slate-800">Shaped around:</span>{" "}
+          {shapedBy.join(" · ")}
+        </p>
+      )}
+
+      <ol className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {PLAN_WEEKS.map(({ week, theme }) => (
+          <li key={week} className="rounded-xl bg-slate-50 px-3 py-2">
+            <span className="block text-xs text-slate-500">Week {week}</span>
+            <span className="block text-sm font-medium text-slate-900">
+              {theme}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      <h2 className="mt-6 text-sm font-medium text-slate-900">
+        Here's what day 1 would look like
+      </h2>
+      <ul className="mt-2 space-y-1.5 text-sm text-slate-700">
+        {firstDay.map((task) => (
+          <li key={task.key} className="flex gap-2">
+            <span aria-hidden="true" className="text-teal-700">
+              ○
+            </span>
+            {task.title}
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-6 text-sm text-slate-500">
+        Not ready? Skip for now. You can build it any time from Home or your
+        Plan page.
+      </p>
+    </>
   );
 }
 
@@ -332,7 +471,7 @@ function ChoiceGroup({
         {options.map((option) => (
           <label
             key={option.value}
-            className={`flex cursor-pointer items-center rounded-xl border px-3 py-2.5 text-sm transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-teal-600 ${
+            className={`flex cursor-pointer items-center rounded-xl border px-3 py-2.5 text-sm transition-colors has-focus-visible:outline-2 has-focus-visible:outline-teal-600 ${
               value === option.value
                 ? "border-teal-600 bg-teal-50 text-teal-900"
                 : "border-slate-200 text-slate-700 hover:bg-slate-50"

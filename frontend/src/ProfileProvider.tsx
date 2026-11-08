@@ -20,11 +20,12 @@ export type Profile = {
   experience_level: string | null;
   tags: string[];
   onboarded_at: string | null;
+  plan_start_date: string | null;
   created_at: string;
 };
 
 const PROFILE_COLUMNS =
-  "display_name, city, bio, job_end_reason, initial_feeling, urgent_need, field, experience_level, tags, onboarded_at, created_at";
+  "display_name, city, bio, job_end_reason, initial_feeling, urgent_need, field, experience_level, tags, onboarded_at, plan_start_date, created_at";
 
 type ProfileState = {
   profile: Profile | null;
